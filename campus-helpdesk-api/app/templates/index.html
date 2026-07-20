@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Campus Helpdesk{% endblock %}
+
+{% block content %}
+
+    <h1>Dashboard</h1>
+    
+    <p>The Campus Helpdesk Ticket Management System is a simple web application that allows students or staff members to report technical and administrative problems to the campus support team.</p>
+
+    <div class="dashboard-counts">
+        <p>• Total number of tickets: <strong>{{ total_tickets }}</strong></p>
+        <p>• Number of open tickets: <strong>{{ open_tickets }}</strong></p>
+        <p>• Number of in progress tickets: <strong>{{ in_progress_tickets }}</strong></p>
+        <p>• Number of resolved tickets: <strong>{{ resolved_tickets }}</strong></p>
+    </div>
+
+{% endblock %}

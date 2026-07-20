@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Ticket - Campus Helpdesk{% endblock %}
+
+{% block content %}
+    <h2>Edit Ticket #{{ ticket.id }}: {{ ticket.title }}</h2>
+
+    <!-- The action dynamically routes to this specific ticket's POST edit endpoint -->
+    <form action="/tickets/{{ ticket.id }}/edit" method="POST">
+        
+        <div>
+            <label for="requester_name">Requester Name:</label>
+            <!-- We use the 'value' attribute to pre-fill text inputs -->
+            <input type="text" id="requester_name" name="requester_name" value="{{ ticket.requester_name }}" required>
+        </div>
+
+        <div>
+            <label for="email">Email Address:</label>
+            <input type="email" id="email" name="email" value="{{ ticket.email }}" required>
+        </div>
+
+        <div>
+            <label for="category">Issue Category:</label>
+            <select id="category" name="category" required>
+                <!-- Using inline Jinja logic to select the currently saved category -->
+                <option value="Technical" {% if ticket.category == 'Technical' %}selected{% endif %}>Technical</option>
+                <option value="Academic" {% if ticket.category == 'Academic' %}selected{% endif %}>Academic</option>
+                <option value="Finance" {% if ticket.category == 'Finance' %}selected{% endif %}>Finance</option>
+                <option value="Facilities" {% if ticket.category == 'Facilities' %}selected{% endif %}>Facilities</option>
+                <option value="Other" {% if ticket.category == 'Other' %}selected{% endif %}>Other</option>
+            </select>
+        </div>
+
+        <div>
+            <label for="title">Ticket Title:</label>
+            <input type="text" id="title" name="title" value="{{ ticket.title }}" required>
+        </div>
+
+        <div>
+            <label for="description">Issue Description:</label>
+            <!-- Textareas do NOT use the 'value' attribute; the data goes between the tags -->
+            <textarea id="description" name="description" rows="5" required>{{ ticket.description }}</textarea>
+        </div>
+
+        <div>
+            <label for="priority">Priority Level:</label>
+            <select id="priority" name="priority">
+                <option value="Low" {% if ticket.priority == 'Low' %}selected{% endif %}>Low</option>
+                <option value="Medium" {% if ticket.priority == 'Medium' %}selected{% endif %}>Medium</option>
+                <option value="High" {% if ticket.priority == 'High' %}selected{% endif %}>High</option>
+            </select>
+        </div>
+
+        <div>
+            <label for="status">Status:</label>
+            <select id="status" name="status">
+                <option value="Open" {% if ticket.status == 'Open' %}selected{% endif %}>Open</option>
+                <option value="In Progress" {% if ticket.status == 'In Progress' %}selected{% endif %}>In Progress</option>
+                <option value="Resolved" {% if ticket.status == 'Resolved' %}selected{% endif %}>Resolved</option>
+            </select>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit">Save Changes</button>
+            <!-- Cancel simply acts as a back button returning to the details view -->
+            <a href="/tickets/{{ ticket.id }}">Cancel</a>
+        </div>
+
+    </form>
+{% endblock %}

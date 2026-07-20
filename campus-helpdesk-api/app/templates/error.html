@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+<!-- The title dynamically sets to the error code if available, otherwise just 'Error' -->
+{% block title %}{{ title | default('Error') }} - Campus Helpdesk{% endblock %}
+
+{% block content %}
+    <div class="error-container" style="text-align: center; margin-top: 50px; padding: 50px; background-color: #fdf2f2; border: 1px solid #e74c3c; border-radius: 8px;">
+        
+        <!-- Large display for the HTTP Status Code (e.g., 404, 422) -->
+        <h1 style="color: #c0392b; font-size: 5em; margin: 0;">
+            {{ status_code | default('Oops!') }}
+        </h1>
+        
+        <h2 style="color: #2c3e50; margin-top: 10px;">Something went wrong.</h2>
+        
+        <!-- The specific error message sent from your FastAPI backend -->
+        <p style="font-size: 1.2em; color: #333; margin: 20px 0 30px 0;">
+            {{ message | default('An unexpected error occurred. Please check your request and try again.') }}
+        </p>
+        
+        <!-- A convenient button to guide the user back to safety -->
+        <a href="/" style="background-color: #3498db; color: white; padding: 12px 25px; text-decoration: none; border-radius: 4px; font-weight: bold; transition: background-color 0.3s;">
+            Return to Dashboard
+        </a>
+        
+    </div>
+{% endblock %}

@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block title %}Delete Ticket - Campus Helpdesk{% endblock %}
+
+{% block content %}
+    <div class="delete-confirmation-box" style="text-align: center; margin-top: 50px;">
+        <h2>Delete Ticket Confirmation</h2>
+        
+        <p style="color: red; font-size: 1.2em;">
+            <strong>Warning:</strong> Are you sure you want to permanently delete this ticket?
+        </p>
+        
+        <div class="ticket-summary" style="margin: 20px auto; padding: 15px; border: 1px solid #ccc; display: inline-block; text-align: left;">
+            <p><strong>Ticket ID:</strong> {{ ticket.id }}</p>
+            <p><strong>Title:</strong> {{ ticket.title }}</p>
+            <p><strong>Requester:</strong> {{ ticket.requester_name }}</p>
+            <p><strong>Status:</strong> {{ ticket.status }}</p>
+        </div>
+
+        <!-- The action dynamically routes to this specific ticket's POST delete endpoint -->
+        <form action="/tickets/{{ ticket.id }}/delete" method="POST" style="margin-top: 20px;">
+            <button type="submit" style="background-color: #d9534f; color: white; padding: 10px 20px; border: none; cursor: pointer;">
+                Yes, Delete Ticket
+            </button>
+            
+            <!-- Cancel simply routes the user back to the details page without modifying the database -->
+            <a href="/tickets" style="margin-left: 15px; text-decoration: none; color: #333;">
+                Cancel
+            </a>
+        </form>
+    </div>
+{% endblock %}

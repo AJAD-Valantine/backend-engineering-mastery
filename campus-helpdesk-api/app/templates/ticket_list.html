@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block title %}All Tickets - Campus Helpdesk{% endblock %}
+
+{% block content %}
+    <h2>All Tickets</h2>
+
+    <table>
+        <thead>
+            <tr>
+                <!-- Column headers based on the MVP scope -->
+                <th>Ticket ID</th>
+                <th>Requester Name</th>
+                <th>Category</th>
+                <th>Title</th>
+                <th>Priority</th>
+                <th>Status</th>
+                <th>Created Date</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Jinja2 loop to iterate over the list of tickets passed from FastAPI -->
+            {% for ticket in tickets %}
+            <tr>
+                <td>{{ ticket.id }}</td>
+                <td>{{ ticket.requester_name }}</td>
+                <td>{{ ticket.category }}</td>
+                <td>{{ ticket.title }}</td>
+                <td>{{ ticket.priority }}</td>
+                <td>{{ ticket.status }}</td>
+                <td>{{ ticket.created_at }}</td>
+                <td>
+                    <!-- Available actions routing to specific ticket IDs -->
+                    <a href="/tickets/{{ ticket.id }}">View</a> |
+                    <a href="/tickets/{{ ticket.id }}/edit">Edit</a> |
+                    <a href="/tickets/{{ ticket.id }}/delete">Delete</a>
+                </td>
+            </tr>
+            <!-- Fallback if there are no tickets in the database yet -->
+            {% else %}
+            <tr>
+                <td colspan="8">No tickets have been submitted yet.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block title %}Ticket Details - Campus Helpdesk{% endblock %}
+
+{% block content %}
+    <h2>Ticket Details: {{ ticket.title }}</h2>
+
+    <div class="ticket-details-card">
+        <ul>
+            <li><strong>Ticket ID:</strong> {{ ticket.id }}</li>
+            <li><strong>Requester Name:</strong> {{ ticket.requester_name }}</li>
+            <li><strong>Email Address:</strong> {{ ticket.email }}</li>
+            <li><strong>Issue Category:</strong> {{ ticket.category }}</li>
+            <li><strong>Title:</strong> {{ ticket.title }}</li>
+            <li><strong>Priority Level:</strong> {{ ticket.priority }}</li>
+            <li><strong>Current Status:</strong> {{ ticket.status }}</li>
+            <li><strong>Created Date:</strong> {{ ticket.created_at }}</li>
+            <li><strong>Last Updated:</strong> {{ ticket.updated_at }}</li>
+        </ul>
+        
+        <div class="ticket-description-box">
+            <h3>Issue Description:</h3>
+            <!-- Using a paragraph or a pre tag preserves the text formatting if they entered multiple lines -->
+            <p>{{ ticket.description }}</p>
+        </div>
+    </div>
+
+    <!-- NEW: The Quick Status Update Form -->
+    <div class="status-update-box" style="margin: 20px 0; padding: 15px; border: 1px solid #ccc; background-color: #f9f9f9;">
+
+        <form action="/tickets/{{ ticket.id }}/status" method="POST">
+            <label for="status"><strong>Update Status:</strong></label>
+            <select name="status" id="status">
+                <!-- Using Jinja2 if statements to automatically select the current status -->
+                <option value="Open" {% if ticket.status == 'Open' %}selected{% endif %}>Open</option>
+                <option value="In Progress" {% if ticket.status == 'In Progress' %}selected{% endif %}>In Progress</option>
+                <option value="Resolved" {% if ticket.status == 'Resolved' %}selected{% endif %}>Resolved</option>
+                
+            </select>
+            <button type="submit">Update Status</button>
+
+        </form>
+    </div>
+
+    <div class="actions">
+        <!-- Links using the dynamic ticket.id to route back to FastAPI -->
+        <a href="/tickets">Back to All Tickets</a> | 
+        <a href="/tickets/{{ ticket.id }}/edit">Edit Ticket</a> | 
+        <a href="/tickets/{{ ticket.id }}/delete">Delete Ticket</a>
+    </div>
+{% endblock %}
