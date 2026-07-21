@@ -1,0 +1,20 @@
+from datetime import datetime
+from decimal import Decimal
+
+from app.database.postgresql_db import Base
+from sqlalchemy import DateTime, ForeignKey, Integer, Numeric, String, UUID, func
+from sqlalchemy.orm import Mapped, mapped_column
+
+
+class Orders(Base):
+    __tablename__ = "orders"
+
+    order_id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    customer_id: Mapped[UUID] = mapped_column(
+        UUID,
+        ForeignKey("customers.customer_id", ondelete="CASCADE"),
+        nullable=False,
+    )
+    total_amount: Mapped[Decimal] = mapped_column(Numeric(10, 2), nullable=False)
+    status: Mapped[str] = mapped_column(String(50), nullable=False, default="pending")
+    created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
