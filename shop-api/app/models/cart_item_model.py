@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from app.database.postgresql_db import Base
+from app.database import Base
 from sqlalchemy import DateTime, ForeignKey, Integer, UUID, func
 from sqlalchemy.orm import Mapped, mapped_column
 

@@ -1,17 +1,16 @@
 from decimal import Decimal
 
-from app.database.postgresql_db import Base
+from app.database import Base
 from sqlalchemy import ForeignKey, Integer, Numeric
 from sqlalchemy.orm import Mapped, mapped_column
-
 
 class OrderItems(Base):
     __tablename__ = "order_items"
 
-    order_item_id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
     order_id: Mapped[int] = mapped_column(
         Integer,
-        ForeignKey("orders.order_id", ondelete="CASCADE"),
+        ForeignKey("orders.id", ondelete="CASCADE"), 
         index=True,
         nullable=False,
     )
