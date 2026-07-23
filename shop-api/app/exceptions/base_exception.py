@@ -1,0 +1,3 @@
+
+class ShopException(Exception):
+    pass
