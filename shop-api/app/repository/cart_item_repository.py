@@ -1,0 +1,47 @@
+from uuid import UUID
+
+from sqlalchemy.orm import Session
+from app.models.cart_item_model import CartItems
+
+
+class CartItemRepository:
+
+    def create_cart_item(self, db : Session, cart_item : CartItems):
+
+        db.add(cart_item)
+        db.commit()
+        db.refresh(cart_item)
+
+        return cart_item
+    
+    def read_cart(self, db : Session, customer_id : UUID):
+
+        return db.query(CartItems).filter(CartItems.customer_id == customer_id).all()
+    
+    def read_cart_item_by_id(self, db : Session, cart_item_id : int):
+
+        return db.query(CartItems).filter(CartItems.cart_id == cart_item_id).first()
+    
+    def update_quantity(self, db : Session, cart_item_id : int, quantity: int):
+
+        cart_item = self.read_cart_item_by_id(db, cart_item_id)
+
+        if cart_item is not None:
+
+            cart_item.quantity = quantity
+        
+            db.commit()
+            db.refresh(cart_item)
+
+        return cart_item
+    
+    def delete_cart_item(self, db : Session, cart_item_id : int):
+
+        cart_item = self.read_cart_item_by_id(db, cart_item_id)
+
+        if cart_item is not None:
+
+            db.delete(cart_item)
+            db.commit()
+
+        return cart_item
