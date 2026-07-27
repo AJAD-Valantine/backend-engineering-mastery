@@ -1,8 +1,11 @@
-class PaymentNotFound(Exception):
+from app.exceptions.base_exception import ShopException
+
+
+class PaymentNotFound(ShopException):
     pass
 
-class PaymentAlreadyExists(Exception):
+class PaymentAlreadyExists(ShopException):
     pass
 
-class InvalidPaymentAmount(Exception):
+class InvalidPaymentAmount(ShopException):
     pass

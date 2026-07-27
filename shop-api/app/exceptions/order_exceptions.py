@@ -1,5 +1,6 @@
 from app.exceptions.base_exception import ShopException
 
+
 class CartIsEmpty(ShopException):
     pass
 
