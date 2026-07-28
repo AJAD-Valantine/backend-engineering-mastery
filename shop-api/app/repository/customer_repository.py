@@ -1,7 +1,8 @@
 from uuid import UUID
-from sqlalchemy.orm import Session
+
 from app.models.customer_model import Customers
 from app.presentation.schemas.customer_schema import CustomerUpdateRequest
+from sqlalchemy.orm import Session
 
 
 class CustomerRepository:

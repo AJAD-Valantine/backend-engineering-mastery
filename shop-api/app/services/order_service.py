@@ -1,17 +1,14 @@
 from decimal import Decimal
 from uuid import UUID
 
-from sqlalchemy.orm import Session
-
+from app.exceptions.order_exceptions import CartIsEmpty, OrderNotFound
+from app.models.order_item_model import OrderItems
+from app.models.order_model import Orders
 from app.repository.order_repository import OrderRepository
-
 from app.services.cart_item_service import CartItemService
 from app.services.product_service import ProductService
+from sqlalchemy.orm import Session
 
-from app.models.order_model import Orders
-from app.models.order_item_model import OrderItems
-
-from app.exceptions.order_exceptions import CartIsEmpty, OrderNotFound
 
 class OrderService:
     

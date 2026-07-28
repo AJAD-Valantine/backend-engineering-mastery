@@ -1,11 +1,13 @@
 from uuid import UUID
-from app.presentation.schemas.response_model import success_response, error_response
-from app.services.cart_item_service import CartItemService
+
+from app.exceptions.base_exception import ShopException
 from app.exceptions.cart_item_exceptions import (
     CartItemNotFound,
     NotEnoughStockAvailable,
 )
 from app.presentation.schemas.cart_item_schema import CartItemResponse
+from app.presentation.schemas.response_model import error_response, success_response
+from app.services.cart_item_service import CartItemService
 
 
 class CartItemController:
@@ -23,7 +25,7 @@ class CartItemController:
         except NotEnoughStockAvailable as e:
             return error_response(str(e), 400)
 
-        except Exception as e:
+        except ShopException as e:
             return error_response(str(e), 500)
 
     def view_cart(self, db, customer_id: UUID):
@@ -37,7 +39,7 @@ class CartItemController:
             ]
             return success_response(response_data, "Cart items fetched successfully")
 
-        except Exception as e:
+        except ShopException as e:
             return error_response(str(e), 500)
 
     def get_cart_item_by_id(self, db, cart_item_id):
@@ -51,7 +53,7 @@ class CartItemController:
         except CartItemNotFound as e:
             return error_response(str(e), 404)
 
-        except Exception as e:
+        except ShopException as e:
             return error_response(str(e), 500)
 
     def update_cart_item(self, db, cart_item_id, request):
@@ -70,7 +72,7 @@ class CartItemController:
         except CartItemNotFound as e:
             return error_response(str(e), 404)
 
-        except Exception as e:
+        except ShopException as e:
             return error_response(str(e), 500)
 
     def remove_cart_item(self, db, cart_item_id):
@@ -83,5 +85,5 @@ class CartItemController:
         except CartItemNotFound as e:
             return error_response(str(e), 404)
 
-        except Exception as e:
+        except ShopException as e:
             return error_response(str(e), 500)

@@ -1,11 +1,11 @@
-from fastapi import APIRouter, Depends
-from sqlalchemy.orm import Session
 from app.database import db_connection
 from app.presentation.controller.product_controller import ProductController
 from app.presentation.schemas.product_schema import (
     ProductCreateRequest,
     ProductUpdateRequest,
 )
+from fastapi import APIRouter, Depends
+from sqlalchemy.orm import Session
 
 product_router = APIRouter(prefix="/products", tags=["Products"])
 controller = ProductController()

@@ -1,7 +1,8 @@
-from app.presentation.schemas.response_model import success_response, error_response
-from app.services.product_service import ProductService
+from app.exceptions.base_exception import ShopException
 from app.exceptions.product_exceptions import ProductNotFound
 from app.presentation.schemas.product_schema import ProductResponse
+from app.presentation.schemas.response_model import error_response, success_response
+from app.services.product_service import ProductService
 
 
 class ProductController:
@@ -16,7 +17,7 @@ class ProductController:
             product = ProductResponse.model_validate(raw_product).model_dump()
             return success_response(product, "product created successfully")
 
-        except Exception as e:
+        except ShopException as e:
             return error_response(str(e), 500)
 
     def get_all_products(self, db):
@@ -33,7 +34,7 @@ class ProductController:
             else:
                 return error_response("no products available", 404)
 
-        except Exception as e:
+        except ShopException as e:
             return error_response(str(e), 500)
 
     def get_product_by_id(self, db, product_id):
@@ -46,6 +47,9 @@ class ProductController:
         except ProductNotFound as e:
             return error_response(str(e), 404)
 
+        except ShopException as e:
+            return error_response(str(e), 500)
+
     def update_product(self, db, product_id, request):
 
         try:
@@ -56,6 +60,9 @@ class ProductController:
         except ProductNotFound as e:
             return error_response(str(e), 404)
 
+        except ShopException as e:
+            return error_response(str(e), 500)
+
     def remove_product(self, db, product_id):
 
         try:
@@ -65,3 +72,6 @@ class ProductController:
 
         except ProductNotFound as e:
             return error_response(str(e), 404)
+
+        except ShopException as e:
+            return error_response(str(e), 500)

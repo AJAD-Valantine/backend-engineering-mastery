@@ -1,17 +1,17 @@
-from app.services.payment_service import PaymentService
-from app.presentation.schemas.payment_schema import (
-    PaymentCreateRequest, 
-    PaymentUpdateRequest, 
-    PaymentResponse
-)
-from app.presentation.schemas.response_model import success_response, error_response
-
-from app.exceptions.payment_exceptions import (
-    PaymentNotFound, 
-    PaymentAlreadyExists, 
-    InvalidPaymentAmount
-)
+from app.exceptions.base_exception import ShopException
 from app.exceptions.order_exceptions import OrderNotFound
+from app.exceptions.payment_exceptions import (
+    InvalidPaymentAmount,
+    PaymentAlreadyExists,
+    PaymentNotFound,
+)
+from app.presentation.schemas.payment_schema import (
+    PaymentCreateRequest,
+    PaymentResponse,
+    PaymentUpdateRequest,
+)
+from app.presentation.schemas.response_model import error_response, success_response
+from app.services.payment_service import PaymentService
 
 
 class PaymentController:
@@ -29,7 +29,7 @@ class PaymentController:
             return error_response(str(e), 400)
         except OrderNotFound as e:
             return error_response(str(e), 404)
-        except Exception as e:
+        except ShopException as e:
             return error_response(str(e), 500)
 
 
@@ -42,7 +42,7 @@ class PaymentController:
             
         except PaymentNotFound as e:
             return error_response(str(e), 404)
-        except Exception as e:
+        except ShopException as e:
             return error_response(str(e), 500)
 
 
@@ -55,7 +55,7 @@ class PaymentController:
             
         except PaymentNotFound as e:
             return error_response(str(e), 404)
-        except Exception as e:
+        except ShopException as e:
             return error_response(str(e), 500)
 
 
@@ -68,5 +68,5 @@ class PaymentController:
             
         except PaymentNotFound as e:
             return error_response(str(e), 404)
-        except Exception as e:
+        except ShopException as e:
             return error_response(str(e), 500)

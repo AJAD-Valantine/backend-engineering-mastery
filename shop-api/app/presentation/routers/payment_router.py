@@ -1,9 +1,11 @@
+from app.database import db_connection
+from app.presentation.controller.payment_controller import PaymentController
+from app.presentation.schemas.payment_schema import (
+    PaymentCreateRequest,
+    PaymentUpdateRequest,
+)
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
-from app.database import db_connection
-
-from app.presentation.controller.payment_controller import PaymentController
-from app.presentation.schemas.payment_schema import PaymentCreateRequest, PaymentUpdateRequest
 
 payment_router = APIRouter(tags=["Payments"])
 controller = PaymentController()

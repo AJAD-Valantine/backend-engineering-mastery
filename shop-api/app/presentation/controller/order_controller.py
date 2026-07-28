@@ -1,9 +1,11 @@
 from uuid import UUID
 
-from app.presentation.schemas.response_model import success_response, error_response
-from app.services.order_service import OrderService
-from app.presentation.schemas.order_schema import OrderResponse, OrderUpdateRequest
+from app.exceptions.base_exception import ShopException
 from app.exceptions.order_exceptions import CartIsEmpty, OrderNotFound
+from app.presentation.schemas.order_schema import OrderResponse, OrderUpdateRequest
+from app.presentation.schemas.response_model import error_response, success_response
+from app.services.order_service import OrderService
+
 
 class OrderController:
 
@@ -19,7 +21,7 @@ class OrderController:
             
         except CartIsEmpty as e:
             return error_response(str(e), 400)
-        except Exception as e:
+        except ShopException as e:
             return error_response(str(e), 500)
 
 
@@ -32,7 +34,7 @@ class OrderController:
         
         except OrderNotFound as e:
             return error_response(str(e), 404)
-        except Exception as e:
+        except ShopException as e:
             return error_response(str(e), 500)
 
 
@@ -48,7 +50,7 @@ class OrderController:
 
             return success_response(data=response_orders, message="Orders fetched")
             
-        except Exception as e:
+        except ShopException as e:
             return error_response(str(e), 500)
 
 
@@ -64,7 +66,7 @@ class OrderController:
 
             return success_response(data=response_orders, message="Orders fetched")
             
-        except Exception as e:
+        except ShopException as e:
             return error_response(str(e), 500)
 
 
@@ -76,5 +78,5 @@ class OrderController:
 
         except OrderNotFound as e:
             return error_response(str(e), 404)
-        except Exception as e:
+        except ShopException as e:
             return error_response(str(e), 500)

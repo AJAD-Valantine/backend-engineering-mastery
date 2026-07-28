@@ -1,13 +1,13 @@
 from uuid import UUID
 
-from fastapi import APIRouter, Depends
-from sqlalchemy.orm import Session
 from app.database import db_connection
 from app.presentation.controller.cart_item_controller import CartItemController
 from app.presentation.schemas.cart_item_schema import (
     CartItemCreateRequest,
     CartItemUpdateRequest,
 )
+from fastapi import APIRouter, Depends
+from sqlalchemy.orm import Session
 
 cart_item_router = APIRouter(tags=["Cart Items"])
 controller = CartItemController()

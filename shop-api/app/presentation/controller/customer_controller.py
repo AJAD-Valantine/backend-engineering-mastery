@@ -1,8 +1,10 @@
 from uuid import UUID
-from app.presentation.schemas.response_model import success_response, error_response
-from app.services.customer_service import CustomerService
+
+from app.exceptions.base_exception import ShopException
 from app.exceptions.customer_exceptions import CustomerNotFound, EmailAlreadyExits
 from app.presentation.schemas.customer_schema import CustomerResponse
+from app.presentation.schemas.response_model import error_response, success_response
+from app.services.customer_service import CustomerService
 
 
 class CustomerController:
@@ -20,7 +22,7 @@ class CustomerController:
         except EmailAlreadyExits as e:
             return error_response(str(e), 400)
 
-        except Exception as e:
+        except ShopException as e:
             return error_response(str(e), 500)
 
     def get_all_customers(self, db):
@@ -37,7 +39,7 @@ class CustomerController:
             else:
                 return error_response("no customers available", 404)
 
-        except Exception as e:
+        except ShopException as e:
             return error_response(str(e), 500)
 
     def get_customer_by_id(self, db, customer_id: UUID):
@@ -50,7 +52,7 @@ class CustomerController:
         except CustomerNotFound as e:
             return error_response(str(e), 404)
 
-        except Exception as e:
+        except ShopException as e:
             return error_response(str(e), 500)
 
     def update_customer(self, db, customer_id, request):
@@ -65,7 +67,7 @@ class CustomerController:
         except CustomerNotFound as e:
             return error_response(str(e), 404)
 
-        except Exception as e:
+        except ShopException as e:
             return error_response(str(e), 500)
 
     def delete_customer(self, db, customer_id):
@@ -78,5 +80,5 @@ class CustomerController:
         except CustomerNotFound as e:
             return error_response(str(e), 404)
 
-        except Exception as e:
+        except ShopException as e:
             return error_response(str(e), 500)

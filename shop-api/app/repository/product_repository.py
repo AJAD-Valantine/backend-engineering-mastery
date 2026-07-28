@@ -1,6 +1,6 @@
-from sqlalchemy.orm import Session
 from app.models.product_model import Products
 from app.presentation.schemas.product_schema import ProductUpdateRequest
+from sqlalchemy.orm import Session
 
 
 class ProductRepository:

@@ -1,13 +1,13 @@
 from uuid import UUID
 
-from fastapi import APIRouter, Depends
-from sqlalchemy.orm import Session
 from app.database import db_connection
 from app.presentation.controller.customer_controller import CustomerController
 from app.presentation.schemas.customer_schema import (
     CustomerCreateRequest,
-    CustomerUpdateRequest
+    CustomerUpdateRequest,
 )
+from fastapi import APIRouter, Depends
+from sqlalchemy.orm import Session
 
 customer_router = APIRouter(prefix="/customers", tags=["Customers"])
 controller = CustomerController()

@@ -1,11 +1,10 @@
 from uuid import UUID
 
-from fastapi import APIRouter, Depends
-from sqlalchemy.orm import Session
 from app.database import db_connection
-
 from app.presentation.controller.order_controller import OrderController
 from app.presentation.schemas.order_schema import OrderUpdateRequest
+from fastapi import APIRouter, Depends
+from sqlalchemy.orm import Session
 
 order_router = APIRouter(tags=["Orders"])
 controller = OrderController()

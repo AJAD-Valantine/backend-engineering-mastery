@@ -1,11 +1,12 @@
-from app.presentation.schemas.customer_schema import (
-    CustomerUpdateRequest,
-    CustomerCreateRequest,
-)
-from app.repository.customer_repository import CustomerRepository
+import uuid
+
 from app.exceptions.customer_exceptions import CustomerNotFound, EmailAlreadyExits
 from app.models.customer_model import Customers
-import uuid
+from app.presentation.schemas.customer_schema import (
+    CustomerCreateRequest,
+    CustomerUpdateRequest,
+)
+from app.repository.customer_repository import CustomerRepository
 
 
 class CustomerService:

@@ -1,6 +1,8 @@
 from datetime import datetime
 from typing import Literal
-from pydantic import BaseModel, Field, ConfigDict
+
+from pydantic import BaseModel, ConfigDict, Field
+
 
 class PaymentCreateRequest(BaseModel):
     order_id: int

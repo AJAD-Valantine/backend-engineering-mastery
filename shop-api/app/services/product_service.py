@@ -1,10 +1,10 @@
+from app.exceptions.product_exceptions import ProductNotFound
+from app.models.product_model import Products
 from app.presentation.schemas.product_schema import (
     ProductCreateRequest,
     ProductUpdateRequest,
 )
 from app.repository.product_repository import ProductRepository
-from app.exceptions.product_exceptions import ProductNotFound
-from app.models.product_model import Products
 
 
 class ProductService:
@@ -38,18 +38,18 @@ class ProductService:
 
     def update_product(self, db, product_id, product: ProductUpdateRequest):
 
-        product = self.product_repository.read_product_by_id(db, product_id)
+        product_result = self.product_repository.read_product_by_id(db, product_id)
 
-        if product is None:
+        if product_result is None:
             raise ProductNotFound("product not found")
 
         return self.product_repository.update_product(db, product_id, product)
 
     def remove_product(self, db, product_id):
 
-        product = self.product_repository.read_product_by_id(db, product_id)
+        product_result = self.product_repository.read_product_by_id(db, product_id)
 
-        if product is None:
+        if product_result is None:
             raise ProductNotFound("product not found")
 
         return self.product_repository.delete_product(db, product_id)
