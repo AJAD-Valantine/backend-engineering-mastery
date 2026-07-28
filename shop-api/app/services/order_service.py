@@ -36,7 +36,7 @@ class OrderService:
         new_order = self.order_repository.create_order(db, new_order)
 
         # Prepare for the Super Loop
-        total_order_amount = Decimal(0.0)
+        total_order_amount = Decimal("0.0")
         order_items_list = []
 
         # The Super Loop (Handles Steps 2, 4, 5, and 6 simultaneously)
