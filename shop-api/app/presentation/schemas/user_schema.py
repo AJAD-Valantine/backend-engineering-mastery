@@ -5,14 +5,17 @@ from pydantic import BaseModel, ConfigDict, EmailStr, Field
 
 
 class UserCreateRequest(BaseModel):
+    
     first_name: str = Field(..., min_length=2, max_length=50)
     last_name: str = Field(..., min_length=2, max_length=50)
     email: EmailStr = Field(...)
+    password: str = Field(..., min_length=8, max_length=25)
     phone: str = Field(..., pattern=r"^\+?[0-9]{10,15}$")
     address: str = Field(..., min_length=10, max_length=75)
 
 
 class UserUpdateRequest(BaseModel):
+
     first_name: str | None = Field(None, min_length=2, max_length=50)
     last_name: str | None = Field(None, min_length=2, max_length=50)
     email: EmailStr | None = Field(None)
@@ -21,10 +24,12 @@ class UserUpdateRequest(BaseModel):
 
 
 class UserResponse(BaseModel):
+
     user_id: UUID
     first_name: str
     last_name: str
     email: EmailStr
+    role: str
     phone: str
     address: str
     created_at: datetime
