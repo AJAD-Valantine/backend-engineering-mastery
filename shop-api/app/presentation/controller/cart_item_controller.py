@@ -5,85 +5,56 @@ from app.exceptions.cart_item_exceptions import (
     CartItemNotFound,
     NotEnoughStockAvailable,
 )
-from app.presentation.schemas.cart_item_schema import CartItemResponse
-from app.presentation.schemas.response_model import error_response, success_response
 from app.services.cart_item_service import CartItemService
+from fastapi import HTTPException, status
 
 
 class CartItemController:
+
     def __init__(self):
         self.cart_item_service = CartItemService()
 
     def add_cart_item(self, db, request):
-
         try:
-            cart_item = self.cart_item_service.add_to_cart(db, request)
-
-            response_data = CartItemResponse.model_validate(cart_item).model_dump()
-            return success_response(response_data, "Cart item added successfully")
+            return self.cart_item_service.add_to_cart(db, request)
 
         except NotEnoughStockAvailable as e:
-            return error_response(str(e), 400)
-
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
         except ShopException as e:
-            return error_response(str(e), 500)
+            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
     def view_cart(self, db, user_id: UUID):
-
         try:
-            cart_items = self.cart_item_service.view_cart(db, user_id)
-
-            response_data = [
-                CartItemResponse.model_validate(item).model_dump()
-                for item in cart_items
-            ]
-            return success_response(response_data, "Cart items fetched successfully")
+            return self.cart_item_service.view_cart(db, user_id)
 
         except ShopException as e:
-            return error_response(str(e), 500)
+            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
-    def get_cart_item_by_id(self, db, cart_item_id):
-
+    def get_cart_item_by_id(self, db, cart_item_id: int):
         try:
-            cart_item = self.cart_item_service.view_cart_item_by_id(db, cart_item_id)
-
-            response_data = CartItemResponse.model_validate(cart_item).model_dump()
-            return success_response(response_data, "Cart item fetched successfully")
+            return self.cart_item_service.view_cart_item_by_id(db, cart_item_id)
 
         except CartItemNotFound as e:
-            return error_response(str(e), 404)
-
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
         except ShopException as e:
-            return error_response(str(e), 500)
+            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
-    def update_cart_item(self, db, cart_item_id, request):
-
+    def update_cart_item(self, db, cart_item_id: int, request):
         try:
-            cart_item = self.cart_item_service.update_quantity(
-                db, cart_item_id, request
-            )
-
-            response_data = CartItemResponse.model_validate(cart_item).model_dump()
-            return success_response(response_data, "Cart item updated successfully")
+            return self.cart_item_service.update_quantity(db, cart_item_id, request)
 
         except NotEnoughStockAvailable as e:
-            return error_response(str(e), 400)
-
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
         except CartItemNotFound as e:
-            return error_response(str(e), 404)
-
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
         except ShopException as e:
-            return error_response(str(e), 500)
+            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
-    def remove_cart_item(self, db, cart_item_id):
-
+    def remove_cart_item(self, db, cart_item_id: int):
         try:
-            self.cart_item_service.remove_cart_item(db, cart_item_id)
-
-            return success_response(None, "Cart item removed successfully")
+            return self.cart_item_service.remove_cart_item(db, cart_item_id)
 
         except CartItemNotFound as e:
-            return error_response(str(e), 404)
-
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
         except ShopException as e:
-            return error_response(str(e), 500)
+            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
