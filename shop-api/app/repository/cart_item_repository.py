@@ -14,9 +14,9 @@ class CartItemRepository:
 
         return cart_item
     
-    def read_cart(self, db : Session, customer_id : UUID):
+    def read_cart(self, db : Session, user_id : UUID):
 
-        return db.query(CartItems).filter(CartItems.customer_id == customer_id).all()
+        return db.query(CartItems).filter(CartItems.user_id == user_id).all()
     
     def read_cart_item_by_id(self, db : Session, cart_item_id : int):
 

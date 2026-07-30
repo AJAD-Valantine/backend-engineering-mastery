@@ -12,10 +12,10 @@ class OrderController:
     def __init__(self):
         self.order_service = OrderService()
 
-    def checkout(self, db, customer_id: UUID):
+    def checkout(self, db, user_id: UUID):
         
         try:
-            order = self.order_service.checkout(db, customer_id)
+            order = self.order_service.checkout(db, user_id)
             response_data = OrderResponse.model_validate(order).model_dump()
             return success_response(data=response_data, message="Order placed successfully")
             
@@ -54,10 +54,10 @@ class OrderController:
             return error_response(str(e), 500)
 
 
-    def get_customer_orders(self, db, customer_id: UUID):
+    def get_user_orders(self, db, user_id: UUID):
 
         try:
-            orders = self.order_service.get_customer_orders(db, customer_id)
+            orders = self.order_service.get_user_orders(db, user_id)
             response_orders = []
 
             for order in orders:

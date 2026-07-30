@@ -9,9 +9,9 @@ class CartItems(Base):
     __tablename__ = "cart_items"
 
     cart_id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
-    customer_id: Mapped[UUID] = mapped_column(
+    user_id: Mapped[UUID] = mapped_column(
         UUID,
-        ForeignKey("customers.customer_id", ondelete="CASCADE"),
+        ForeignKey("users.user_id", ondelete="CASCADE"),
         nullable=False,
     )
     product_id: Mapped[int] = mapped_column(

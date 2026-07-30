@@ -18,10 +18,10 @@ class OrderService:
         self.product_service = ProductService()
 
     
-    def checkout(self, db: Session, customer_id: UUID):
+    def checkout(self, db: Session, user_id: UUID):
         
-        # STEP 1: Get all cart items of the customer
-        cart_items = self.cart_service.view_cart(db, customer_id)
+        # STEP 1: Get all cart items of the user
+        cart_items = self.cart_service.view_cart(db, user_id)
         
         if not cart_items:
             # Safety check: Prevent checking out an empty cart
@@ -30,7 +30,7 @@ class OrderService:
         # STEP 3: Create an order (header) first to get an ID
         # We start with a total of 0.0, we will update it later.
         new_order = Orders(
-            customer_id=customer_id,
+            user_id=user_id,
             total_amount=0.0
         )
         new_order = self.order_repository.create_order(db, new_order)
@@ -62,7 +62,7 @@ class OrderService:
             # STEP 5: Reduce product stock
             product.stock_quantity -= cart_item.quantity
             
-            # STEP 6: Clear the customer cart
+            # STEP 6: Clear the user cart
             # Deleting the item from the db session wipes it from the cart table
             db.delete(cart_item)
 
@@ -87,8 +87,8 @@ class OrderService:
             raise OrderNotFound(f"Order with ID {order_id} not found")
         return order
 
-    def get_customer_orders(self, db: Session, customer_id: UUID):
-        return self.order_repository.read_order_by_customer_id(db, customer_id)
+    def get_user_orders(self, db: Session, user_id: UUID):
+        return self.order_repository.read_order_by_user_id(db, user_id)
     
     def update_order_status(self, db: Session, order_id: int, status_update: str):
         

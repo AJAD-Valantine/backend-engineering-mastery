@@ -8,7 +8,7 @@ from sqlalchemy.orm import Mapped, mapped_column
 class Users(Base):
     __tablename__ = "users"
 
-    customer_id: Mapped[UUID] = mapped_column(UUID(as_uuid=True), primary_key=True)
+    user_id: Mapped[UUID] = mapped_column(UUID(as_uuid=True), primary_key=True)
     first_name: Mapped[str] = mapped_column(String(100), nullable=False)
     last_name: Mapped[str] = mapped_column(String(100), nullable=False)
     email: Mapped[str] = mapped_column(String(150), unique=True, nullable=False, index=True)

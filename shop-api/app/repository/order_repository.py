@@ -24,8 +24,8 @@ class OrderRepository:
     def read_order_by_id(self, db: Session, order_id: int):
         return db.query(Orders).filter(Orders.id == order_id).first()
 
-    def read_order_by_customer_id(self, db: Session, customer_id: UUID):
-        return db.query(Orders).filter(Orders.customer_id == customer_id).all()
+    def read_order_by_user_id(self, db: Session, user_id: UUID):
+        return db.query(Orders).filter(Orders.user_id == user_id).all()
     
     def update_status(self, db: Session, order_id: int, status: str):
         order = self.read_order_by_id(db, order_id)

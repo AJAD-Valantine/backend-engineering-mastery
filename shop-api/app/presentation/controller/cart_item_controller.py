@@ -28,10 +28,10 @@ class CartItemController:
         except ShopException as e:
             return error_response(str(e), 500)
 
-    def view_cart(self, db, customer_id: UUID):
+    def view_cart(self, db, user_id: UUID):
 
         try:
-            cart_items = self.cart_item_service.view_cart(db, customer_id)
+            cart_items = self.cart_item_service.view_cart(db, user_id)
 
             response_data = [
                 CartItemResponse.model_validate(item).model_dump()

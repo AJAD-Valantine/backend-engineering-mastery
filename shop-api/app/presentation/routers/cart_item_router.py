@@ -18,9 +18,9 @@ def add_cart_item(request: CartItemCreateRequest, db: Session = Depends(db_conne
     return controller.add_cart_item(db, request)
 
 
-@cart_item_router.get("/customers/{customer_id}/cart")
-def view_cart(customer_id: UUID, db: Session = Depends(db_connection)): # noqa: B008
-    return controller.view_cart(db, customer_id)
+@cart_item_router.get("/users/{user_id}/cart")
+def view_cart(user_id: UUID, db: Session = Depends(db_connection)): # noqa: B008
+    return controller.view_cart(db, user_id)
 
 
 @cart_item_router.get("/item/{cart_item_id}")

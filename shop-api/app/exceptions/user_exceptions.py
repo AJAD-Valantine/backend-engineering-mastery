@@ -1,7 +1,7 @@
 from app.exceptions.base_exception import ShopException
 
 
-class CustomerNotFound(ShopException):
+class UserNotFound(ShopException):
     pass
 
 class EmailAlreadyExits(ShopException):

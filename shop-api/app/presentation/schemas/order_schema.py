@@ -13,7 +13,7 @@ class OrderUpdateRequest(BaseModel):
 
 class OrderResponse(BaseModel):
     id: int
-    customer_id: UUID
+    user_id: UUID
     total_amount: float
     status: Literal[
         "Pending", "Confirmed", "Packed", "Shipped", "Delivered", "Cancelled"

@@ -4,7 +4,7 @@ from uuid import UUID
 from pydantic import BaseModel, ConfigDict, EmailStr, Field
 
 
-class CustomerCreateRequest(BaseModel):
+class UserCreateRequest(BaseModel):
     first_name: str = Field(..., min_length=2, max_length=50)
     last_name: str = Field(..., min_length=2, max_length=50)
     email: EmailStr = Field(...)
@@ -12,7 +12,7 @@ class CustomerCreateRequest(BaseModel):
     address: str = Field(..., min_length=10, max_length=75)
 
 
-class CustomerUpdateRequest(BaseModel):
+class UserUpdateRequest(BaseModel):
     first_name: str | None = Field(None, min_length=2, max_length=50)
     last_name: str | None = Field(None, min_length=2, max_length=50)
     email: EmailStr | None = Field(None)
@@ -20,8 +20,8 @@ class CustomerUpdateRequest(BaseModel):
     address: str | None = Field(None, min_length=10, max_length=75)
 
 
-class CustomerResponse(BaseModel):
-    customer_id: UUID
+class UserResponse(BaseModel):
+    user_id: UUID
     first_name: str
     last_name: str
     email: EmailStr
