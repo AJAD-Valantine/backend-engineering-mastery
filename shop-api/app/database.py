@@ -1,10 +1,10 @@
-from app.config import SQLALCHEMY_DATABASE_URL
+from core.config import settings
 from sqlalchemy import create_engine
 from sqlalchemy.orm import DeclarativeBase, sessionmaker
 
 # Create Session
 engine = create_engine(
-    SQLALCHEMY_DATABASE_URL
+    settings.SQLALCHEMY_DATABASE_URL
 )
 
 # Session Factory
@@ -25,7 +25,7 @@ def db_connection():
         db.close()
 
 # Creating DB Tables
-from app.models import cart_item_model, customer_model, product_model, order_item_model, order_model, payment_model #noqa
+from app.models import cart_item_model, product_model, order_item_model, order_model, payment_model, user_model #noqa
 
 def init_models():
 
