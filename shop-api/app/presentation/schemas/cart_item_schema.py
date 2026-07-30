@@ -5,7 +5,6 @@ from pydantic import BaseModel, ConfigDict, Field
 
 
 class CartItemCreateRequest(BaseModel):
-    user_id: UUID = Field(...)
     product_id: int = Field(...)
     quantity: int = Field(..., gt=0)
 
