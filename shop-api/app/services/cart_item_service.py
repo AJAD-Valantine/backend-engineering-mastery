@@ -10,8 +10,8 @@ from app.presentation.schemas.cart_item_schema import (
     CartItemUpdateRequest,
 )
 from app.repository.cart_item_repository import CartItemRepository
-from app.services.user_service import UserService
 from app.services.product_service import ProductService
+from app.services.user_service import UserService
 
 
 class CartItemService:

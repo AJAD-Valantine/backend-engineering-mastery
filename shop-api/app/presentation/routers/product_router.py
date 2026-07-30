@@ -1,4 +1,4 @@
-from app.database import db_connection
+from app.core.dependencies import db_connection
 from app.presentation.controller.product_controller import ProductController
 from app.presentation.schemas.product_schema import (
     ProductCreateRequest,

@@ -1,4 +1,4 @@
-from core.config import settings
+from app.core.config import settings
 from sqlalchemy import create_engine
 from sqlalchemy.orm import DeclarativeBase, sessionmaker
 
@@ -15,14 +15,6 @@ SessionLocal = sessionmaker(autocommit=False,
 # Base Class
 class Base(DeclarativeBase):
     pass
-
-#Dependency
-def db_connection():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
 
 # Creating DB Tables
 from app.models import cart_item_model, product_model, order_item_model, order_model, payment_model, user_model #noqa

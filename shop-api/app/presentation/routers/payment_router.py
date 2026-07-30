@@ -1,4 +1,4 @@
-from app.database import db_connection
+from app.core.dependencies import db_connection
 from app.presentation.controller.payment_controller import PaymentController
 from app.presentation.schemas.payment_schema import (
     PaymentCreateRequest,

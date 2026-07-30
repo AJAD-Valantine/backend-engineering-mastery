@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from app.database import db_connection
+from app.core.dependencies import db_connection
 from app.presentation.controller.order_controller import OrderController
 from app.presentation.schemas.order_schema import OrderUpdateRequest
 from fastapi import APIRouter, Depends

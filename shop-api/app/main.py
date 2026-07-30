@@ -1,4 +1,4 @@
-from app.database import init_models
+from app.core.database import init_models
 from app.presentation.routers.auth_router import auth_router
 from app.presentation.routers.cart_item_router import cart_item_router
 from app.presentation.routers.order_router import order_router

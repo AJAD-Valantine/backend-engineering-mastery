@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from app.database import db_connection
+from app.core.dependencies import db_connection
 from app.presentation.controller.cart_item_controller import CartItemController
 from app.presentation.schemas.cart_item_schema import (
     CartItemCreateRequest,

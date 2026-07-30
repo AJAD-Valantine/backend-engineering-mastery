@@ -1,4 +1,4 @@
-from app.database import db_connection
+from app.core.dependencies import db_connection
 from app.presentation.controller.auth_controller import AuthController
 from app.presentation.schemas.auth_schema import Token
 from app.presentation.schemas.user_schema import UserCreateRequest, UserResponse
