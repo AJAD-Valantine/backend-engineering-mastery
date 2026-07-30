@@ -20,12 +20,7 @@ class Settings(BaseSettings):
 
     @property
     def SQLALCHEMY_DATABASE_URL(self):
-        return  f"""{self.db_engine}://
-                    {self.db_username.get_secret_value()}:
-                    {self.db_password.get_secret_value()}@
-                    {self.db_host}:
-                    {self.db_port}/
-                    {self.db_name}"""
+        return  f"{self.db_engine}://{self.db_username.get_secret_value()}:{self.db_password.get_secret_value()}@{self.db_host}:{self.db_port}/{self.db_name}"
 
     # Auth
 
