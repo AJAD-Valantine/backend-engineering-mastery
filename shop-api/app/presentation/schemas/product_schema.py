@@ -21,7 +21,7 @@ class ProductUpdateRequest(BaseModel):
 
 
 class ProductResponse(BaseModel):
-    product_id: UUID
+    product_id: int
     name: str
     description: str
     price: float
