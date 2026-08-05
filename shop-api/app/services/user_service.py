@@ -1,9 +1,10 @@
 import uuid
 
+from app.core.security import hash_password
 from app.exceptions.user_exceptions import EmailAlreadyExits, UserNotFound
 from app.models.user_model import Users
 from app.presentation.schemas.user_schema import (
-    UserCreateRequest,
+    AdminCreateUserRequest,
     UserUpdateRequest,
 )
 from app.repository.user_repository import UserRepository
@@ -13,7 +14,7 @@ class UserService:
     def __init__(self) -> None:
         self.user_repository = UserRepository()
 
-    def add_user(self, db, user: UserCreateRequest):
+    def add_user(self, db, user: AdminCreateUserRequest, role : str = "customer"):
 
         if (
             self.user_repository.read_user_by_email(db, user.email)
@@ -23,6 +24,8 @@ class UserService:
 
         user_id = uuid.uuid4()
 
+        hashed_password = hash_password(user.password)
+
         data = Users(
             user_id=user_id,
             first_name=user.first_name,
@@ -30,6 +33,8 @@ class UserService:
             email=user.email,
             phone=user.phone,
             address=user.address,
+            hashed_password=hashed_password,
+            role=role
         )
 
         return self.user_repository.create_user(db, data)

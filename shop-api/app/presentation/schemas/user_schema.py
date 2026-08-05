@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Literal
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, EmailStr, Field
@@ -12,6 +13,9 @@ class UserCreateRequest(BaseModel):
     password: str = Field(..., min_length=8, max_length=25)
     phone: str = Field(..., pattern=r"^\+?[0-9]{10,15}$")
     address: str = Field(..., min_length=10, max_length=75)
+
+class AdminCreateUserRequest(UserCreateRequest):
+    role: Literal["customer", "mod", "admin"] = Field(...)
 
 
 class UserUpdateRequest(BaseModel):

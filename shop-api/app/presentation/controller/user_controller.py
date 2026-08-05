@@ -14,7 +14,7 @@ class UserController:
     def create_user(self, db, request):
 
         try:
-            return self.user_service.add_user(db, request)
+            return self.user_service.add_user(db, request, role=request.role)
 
         except EmailAlreadyExits as e:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))

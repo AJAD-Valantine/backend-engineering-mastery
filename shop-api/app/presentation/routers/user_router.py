@@ -1,11 +1,10 @@
 from uuid import UUID
 
-# Make sure you are using your updated unified dependency here!
 from app.core.dependencies import db_connection, get_current_user
 from app.models.user_model import Users
 from app.presentation.controller.user_controller import UserController
 from app.presentation.schemas.user_schema import (
-    UserCreateRequest,
+    AdminCreateUserRequest,
     UserUpdateRequest,
 )
 from fastapi import APIRouter, Depends
@@ -18,7 +17,7 @@ controller = UserController()
 # 🚨 Admin Only (RBAC pending)
 @user_router.post("/create-user")
 def create_user(
-    request: UserCreateRequest, 
+    request:AdminCreateUserRequest, 
     db: Session = Depends(db_connection),
     current_user: Users = Depends(get_current_user)
 ):  
