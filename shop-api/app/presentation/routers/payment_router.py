@@ -21,32 +21,30 @@ def add_payment(
 ): 
     # NOTE: Inside your controller, you MUST verify that the order being 
     # paid for actually belongs to current_user.user_id!
-    return controller.add_payment(db, request)
+    return controller.add_payment(db, request, current_user)
 
 
-# ✅ Standard User Route (View a specific payment receipt)
+# ✅ Standard User Route
 @payment_router.get("/payments/{payment_id}")
 def get_payment(
     payment_id: int, 
     db: Session = Depends(db_connection),
     current_user: Users = Depends(get_current_user)
 ): 
-    # NOTE: The controller must check that this payment belongs to the logged-in user.
-    return controller.get_payment_by_id(db, payment_id)
+    return controller.get_payment_by_id(db, payment_id, current_user)
 
 
-# ✅ Standard User Route (View payment for an order)
+# ✅ Standard User Route
 @payment_router.get("/orders/{order_id}/payment")
 def get_payment_by_order(
     order_id: int, 
     db: Session = Depends(db_connection),
     current_user: Users = Depends(get_current_user)
 ): 
-    # NOTE: The controller must check that the order belongs to the logged-in user.
-    return controller.get_payment_by_order(db, order_id)
+    return controller.get_payment_by_order(db, order_id, current_user)
 
 
-# 🚨 Admin Only (RBAC pending - customers cannot mark their own payments as "Refunded" or "Paid")
+# 🚨 Admin Only
 @payment_router.put("/payments/{payment_id}/status")
 def update_payment_status(
     payment_id: int, 

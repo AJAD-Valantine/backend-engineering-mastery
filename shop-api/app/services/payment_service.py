@@ -16,45 +16,45 @@ class PaymentService:
         self.payment_repository = PaymentRepository()
         self.order_service = OrderService()
 
-    def add_payment(self, db: Session, request: PaymentCreateRequest):
+    def add_payment(self, db: Session, request: PaymentCreateRequest, current_user):
         
-        # 1. Verify the order exists (OrderService will raise OrderNotFound if it doesn't)
-        order = self.order_service.get_order_by_id(db, request.order_id)
+        order = self.order_service.get_order_by_id(db, request.order_id, current_user)
 
-        # 2. Enforce Business Rule: One payment per order
         existing_payment = self.payment_repository.read_payment_by_order_id(db, request.order_id)
         if existing_payment:
             raise PaymentAlreadyExists(f"A payment already exists for Order ID {request.order_id}")
 
-        # 3. Enforce Business Rule: Amount must match exactly
-        # We cast both to float to avoid Decimal vs Float mismatch errors
         if float(request.paid_amount) != float(order.total_amount):
             raise InvalidPaymentAmount(
                 f"Payment amount ({request.paid_amount}) must match the order total ({order.total_amount})"
             )
 
-        # 4. If all checks pass, build the model and save it
         new_payment = Payments(
             order_id=request.order_id,
             payment_method=request.payment_method,
             paid_amount=request.paid_amount
-            # payment_status defaults to "Pending" automatically via the DB model
         )
         
         return self.payment_repository.create_payment(db, new_payment)
 
 
-    def get_payment_by_id(self, db: Session, payment_id: int):
+    def get_payment_by_id(self, db: Session, payment_id: int, current_user):
         payment = self.payment_repository.read_payment_by_id(db, payment_id)
         if not payment:
             raise PaymentNotFound(f"Payment with ID {payment_id} not found")
+
+        self.order_service.get_order_by_id(db, payment.order_id, current_user)
+
         return payment
 
 
-    def get_payment_by_order_id(self, db: Session, order_id: int):
+    def get_payment_by_order_id(self, db: Session, order_id: int, current_user):
+        self.order_service.get_order_by_id(db, order_id, current_user)
+
         payment = self.payment_repository.read_payment_by_order_id(db, order_id)
         if not payment:
             raise PaymentNotFound(f"No payment record found for Order ID {order_id}")
+
         return payment
 
 

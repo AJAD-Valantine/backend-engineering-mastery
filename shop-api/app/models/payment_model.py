@@ -5,6 +5,7 @@ from app.core.database import Base
 from sqlalchemy import DateTime, ForeignKey, Integer, Numeric, String, func
 from sqlalchemy.orm import Mapped, mapped_column
 
+
 class Payments(Base):
     __tablename__ = "payments"
 

@@ -37,9 +37,7 @@ def get_order(
     db: Session = Depends(db_connection),
     current_user: Users = Depends(get_current_user)
 ): 
-    # Note: Later in your controller, you should add a check to make sure 
-    # the order being fetched actually belongs to current_user.user_id!
-    return controller.get_order_by_id(db, order_id)
+    return controller.get_order_by_id(db, order_id, current_user)
 
 
 # ✅ Standard User Route

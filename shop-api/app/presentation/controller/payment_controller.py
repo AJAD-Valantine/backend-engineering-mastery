@@ -18,9 +18,9 @@ class PaymentController:
     def __init__(self):
         self.payment_service = PaymentService()
 
-    def add_payment(self, db, request: PaymentCreateRequest):
+    def add_payment(self, db, request: PaymentCreateRequest, current_user):
         try:
-            return self.payment_service.add_payment(db, request)
+            return self.payment_service.add_payment(db, request, current_user)
             
         except (PaymentAlreadyExists, InvalidPaymentAmount) as e:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
@@ -29,20 +29,18 @@ class PaymentController:
         except ShopException as e:
             raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
-    def get_payment_by_id(self, db, payment_id: int):
+    def get_payment_by_id(self, db, payment_id: int, current_user):
         try:
-            return self.payment_service.get_payment_by_id(db, payment_id)
-            
-        except PaymentNotFound as e:
+            return self.payment_service.get_payment_by_id(db, payment_id, current_user)
+        except (PaymentNotFound, OrderNotFound) as e:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
         except ShopException as e:
             raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
-    def get_payment_by_order(self, db, order_id: int):
+    def get_payment_by_order(self, db, order_id: int, current_user):
         try:
-            return self.payment_service.get_payment_by_order_id(db, order_id)
-            
-        except PaymentNotFound as e:
+            return self.payment_service.get_payment_by_order_id(db, order_id, current_user)
+        except (PaymentNotFound, OrderNotFound) as e:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
         except ShopException as e:
             raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))

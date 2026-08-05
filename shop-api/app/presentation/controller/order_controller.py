@@ -21,9 +21,9 @@ class OrderController:
         except ShopException as e:
             raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
-    def get_order_by_id(self, db, order_id: int):
+    def get_order_by_id(self, db, order_id: int, current_user):
         try:
-            return self.order_service.get_order_by_id(db, order_id)
+            return self.order_service.get_order_by_id(db, order_id, current_user)
         
         except OrderNotFound as e:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
