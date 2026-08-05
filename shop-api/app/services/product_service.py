@@ -25,7 +25,7 @@ class ProductService:
 
     def get_all_products(self, db):
 
-        return self.get_all_products(db)
+        return self.product_repository.read_all_products(db)
 
     def get_product_by_id(self, db, product_id: int):
 
