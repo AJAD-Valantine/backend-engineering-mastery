@@ -20,7 +20,8 @@ def add_cart_item(
     db: Session = Depends(db_connection),
     current_user: Users = Depends(get_current_user)
 ): 
-    return controller.add_cart_item(db, request)
+    safe_uuid = UUID(str(current_user.user_id))
+    return controller.add_cart_item(db, safe_uuid, request)
 
 
 # ✅ Standard User Route

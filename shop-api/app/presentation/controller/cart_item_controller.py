@@ -14,9 +14,9 @@ class CartItemController:
     def __init__(self):
         self.cart_item_service = CartItemService()
 
-    def add_cart_item(self, db, request):
+    def add_cart_item(self, db, user_id: UUID, request):
         try:
-            return self.cart_item_service.add_to_cart(db, request)
+            return self.cart_item_service.add_to_cart(db, user_id, request)
 
         except NotEnoughStockAvailable as e:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))

@@ -20,15 +20,15 @@ class CartItemService:
         self.user_service = UserService()
         self.product_service = ProductService()
 
-    def add_to_cart(self, db, cart_item: CartItemCreateRequest):
+    def add_to_cart(self, db, user_id: UUID, cart_item: CartItemCreateRequest):
 
-        self.user_service.get_user_by_id(db, cart_item.user_id)
+        self.user_service.get_user_by_id(db, user_id)
         product = self.product_service.get_product_by_id(db, cart_item.product_id)
 
         if product.stock_quantity < cart_item.quantity:
             raise NotEnoughStockAvailable("Not enough stock available")
 
-        existing_cart = self.cart_item_repository.read_cart(db, cart_item.user_id)
+        existing_cart = self.cart_item_repository.read_cart(db, user_id)
 
         existing_item = None
         for item in existing_cart:
@@ -50,7 +50,7 @@ class CartItemService:
 
         else:
             new_cart_model = CartItems(
-                user_id=cart_item.user_id,
+                user_id=user_id,
                 product_id=cart_item.product_id,
                 quantity=cart_item.quantity,
             )
