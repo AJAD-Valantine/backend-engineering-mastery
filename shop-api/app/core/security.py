@@ -1,8 +1,9 @@
 from datetime import UTC, datetime, timedelta
 
-from app.core.config import settings
 from jwt import InvalidTokenError, decode, encode
 from pwdlib import PasswordHash
+
+from app.core.config import settings
 
 password_hash = PasswordHash.recommended()
 

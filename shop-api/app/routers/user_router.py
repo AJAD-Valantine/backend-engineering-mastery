@@ -1,17 +1,18 @@
 from uuid import UUID
 
-from app.core.dependencies import db_connection, get_current_user
-from app.models.user_model import Users
-from app.presentation.controller.user_controller import UserController
-from app.presentation.schemas.user_schema import (
-    AdminCreateUserRequest,
-    UserUpdateRequest,
-)
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
+from app.core.dependencies import db_connection, get_current_user
+from app.models.user_model import Users
+from app.schemas.user_schema import (
+    AdminCreateUserRequest,
+    UserUpdateRequest,
+)
+from app.services.user_service import UserService
+
 user_router = APIRouter(prefix="/users", tags=["Users"])
-controller = UserController()
+user_service = UserService()
 
 
 # 🚨 Admin Only (RBAC pending)
@@ -21,7 +22,7 @@ def create_user(
     db: Session = Depends(db_connection),
     current_user: Users = Depends(get_current_user)
 ):  
-    return controller.create_user(db, request)
+    return user_service.add_user(db, request, request.role)
 
 
 # 🚨 Admin Only (RBAC pending)
@@ -30,7 +31,7 @@ def get_all_users(
     db: Session = Depends(db_connection),
     current_user: Users = Depends(get_current_user)
 ):
-    return controller.get_all_users(db)
+    return user_service.get_all_users(db)
 
 
 # ✅ Standard User Route (View own profile)
@@ -39,9 +40,7 @@ def get_user(
     db: Session = Depends(db_connection),
     current_user: Users = Depends(get_current_user)
 ): 
-    # Fixes Pylance
-    safe_uuid = UUID(str(current_user.user_id))
-    return controller.get_user_by_id(db, safe_uuid)
+    return user_service.get_user_by_id(db, current_user.user_id)
 
 
 # ✅ Standard User Route (Update own profile)
@@ -51,16 +50,14 @@ def update_user(
     db: Session = Depends(db_connection),
     current_user: Users = Depends(get_current_user)
 ):  
-    # Fixes Pylance
-    safe_uuid = UUID(str(current_user.user_id))
-    return controller.update_user(db, safe_uuid, request)
+    return user_service.update_user(db, current_user.user_id, request)
 
 
 # 🚨 Admin Only (RBAC pending)
 @user_router.delete("/{user_id}")
 def delete_user(
-    user_id: UUID, # Grab the ID from the URL path!
+    user_id: UUID,
     db: Session = Depends(db_connection),
     current_user: Users = Depends(get_current_user)
 ):
-    return controller.delete_user(db, user_id)
+    return user_service.remove_user(db, user_id)

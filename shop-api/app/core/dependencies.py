@@ -1,12 +1,13 @@
 from uuid import UUID
 
-from app.core import security
-from app.core.database import SessionLocal
-from app.presentation.schemas.auth_schema import TokenData
-from app.repository.user_repository import UserRepository
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
+
+from app.core import security
+from app.core.database import SessionLocal
+from app.repository.user_repository import UserRepository
+from app.schemas.auth_schema import TokenData
 
 # --- DATABASE DEPENDENCY ---
 
@@ -23,7 +24,7 @@ def db_connection():
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
-def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(db_connection)): # noqa
+def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(db_connection)): 
     """The Bouncer: Intercepts the token, decodes it, and returns the database User."""
 
     credentials_exception = HTTPException(

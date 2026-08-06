@@ -1,13 +1,17 @@
+from sqlalchemy.orm import Session
+
 from app.core import security
+from app.exceptions.user_exceptions import (
+    InvalidCredentials,  # Import the new exception
+)
 from app.models.user_model import Users
-from app.presentation.schemas.user_schema import UserCreateRequest
+from app.schemas.auth_schema import Token  # Import the Token schema
+from app.schemas.user_schema import UserCreateRequest
 from app.repository.user_repository import UserRepository
 from app.services.user_service import UserService
-from sqlalchemy.orm import Session
 
 
 class AuthService:
-
     def __init__(self):
         self.user_repository = UserRepository()
         self.user_service = UserService()
@@ -16,14 +20,13 @@ class AuthService:
 
         return self.user_service.add_user(db, request)     
 
-    def authenticate_user(self, db: Session, email: str, plain_password: str):
-
+    def authenticate_user(self, db: Session, email: str, plain_password: str) -> Token:
         user = self.user_repository.read_user_by_email(db, email)
 
-        if user is None:
-            return 
+        if user is None or not security.verify_password(plain_password, user.hashed_password):
+            raise InvalidCredentials()
+        
+        payload = {"sub": str(user.user_id), "role": user.role}
+        token = security.create_access_token(payload)
 
-        if security.verify_password(plain_password, user.hashed_password):
-            return user
-
-        return None        
+        return Token(access_token=token, token_type="bearer")

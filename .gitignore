@@ -1,18 +1,7 @@
-# Virtual environment
-.venv/
-
-# Environment variables
+combined_code.txt
+.venv
+.vscode
 .env
-
-# Python cache
-__pycache__/
-*.pyc
-*.pyo
-
-# IDE
-.vscode/
-.idea/
-
-requirements.txt
-
 pyproject.toml
+files.py
+.gitignore

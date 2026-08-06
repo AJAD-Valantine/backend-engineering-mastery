@@ -1,6 +1,6 @@
 from app.exceptions.product_exceptions import ProductNotFound
 from app.models.product_model import Products
-from app.presentation.schemas.product_schema import (
+from app.schemas.product_schema import (
     ProductCreateRequest,
     ProductUpdateRequest,
 )

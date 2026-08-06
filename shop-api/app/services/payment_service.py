@@ -5,7 +5,7 @@ from app.exceptions.payment_exceptions import (
     PaymentNotFound,
 )
 from app.models.payment_model import Payments
-from app.presentation.schemas.payment_schema import PaymentCreateRequest
+from app.schemas.payment_schema import PaymentCreateRequest
 from app.repository.payment_repository import PaymentRepository
 from app.services.order_service import OrderService
 from sqlalchemy.orm import Session

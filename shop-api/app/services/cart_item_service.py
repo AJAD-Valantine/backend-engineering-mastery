@@ -5,7 +5,7 @@ from app.exceptions.cart_item_exceptions import (
     NotEnoughStockAvailable,
 )
 from app.models.cart_item_model import CartItems
-from app.presentation.schemas.cart_item_schema import (
+from app.schemas.cart_item_schema import (
     CartItemCreateRequest,
     CartItemUpdateRequest,
 )

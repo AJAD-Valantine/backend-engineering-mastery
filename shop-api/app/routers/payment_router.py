@@ -1,15 +1,16 @@
-from app.core.dependencies import db_connection, get_current_user
-from app.models.user_model import Users
-from app.presentation.controller.payment_controller import PaymentController
-from app.presentation.schemas.payment_schema import (
-    PaymentCreateRequest,
-    PaymentUpdateRequest,
-)
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
+from app.core.dependencies import db_connection, get_current_user
+from app.models.user_model import Users
+from app.schemas.payment_schema import (
+    PaymentCreateRequest,
+    PaymentUpdateRequest,
+)
+from app.services.payment_service import PaymentService
+
 payment_router = APIRouter(tags=["Payments"])
-controller = PaymentController()
+payment_service = PaymentService()
 
 
 # ✅ Standard User Route (Paying for an order)
@@ -19,9 +20,7 @@ def add_payment(
     db: Session = Depends(db_connection),
     current_user: Users = Depends(get_current_user)
 ): 
-    # NOTE: Inside your controller, you MUST verify that the order being 
-    # paid for actually belongs to current_user.user_id!
-    return controller.add_payment(db, request, current_user)
+    return payment_service.add_payment(db, request, current_user)
 
 
 # ✅ Standard User Route
@@ -31,7 +30,7 @@ def get_payment(
     db: Session = Depends(db_connection),
     current_user: Users = Depends(get_current_user)
 ): 
-    return controller.get_payment_by_id(db, payment_id, current_user)
+    return payment_service.get_payment_by_id(db, payment_id, current_user)
 
 
 # ✅ Standard User Route
@@ -41,7 +40,7 @@ def get_payment_by_order(
     db: Session = Depends(db_connection),
     current_user: Users = Depends(get_current_user)
 ): 
-    return controller.get_payment_by_order(db, order_id, current_user)
+    return payment_service.get_payment_by_order_id(db, order_id, current_user)
 
 
 # 🚨 Admin Only
@@ -52,4 +51,4 @@ def update_payment_status(
     db: Session = Depends(db_connection),
     current_user: Users = Depends(get_current_user)
 ): 
-    return controller.update_payment_status(db, payment_id, request)
+    return payment_service.update_payment_status(db, payment_id, request.payment_status)
