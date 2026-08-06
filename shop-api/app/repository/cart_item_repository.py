@@ -1,7 +1,8 @@
 from uuid import UUID
 
-from app.models.cart_item_model import CartItems
 from sqlalchemy.orm import Session
+
+from app.models.cart_item_model import CartItems
 
 
 class CartItemRepository:

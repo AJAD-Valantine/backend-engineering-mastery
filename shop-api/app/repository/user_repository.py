@@ -1,8 +1,9 @@
 from uuid import UUID
 
-from app.models.user_model import Users
-from app.presentation.schemas.user_schema import UserUpdateRequest
 from sqlalchemy.orm import Session
+
+from app.models.user_model import Users
+from app.schemas.user_schema import UserUpdateRequest
 
 
 class UserRepository:
