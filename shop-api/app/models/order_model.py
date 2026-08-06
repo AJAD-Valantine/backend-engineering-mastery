@@ -1,16 +1,18 @@
+import uuid
 from datetime import datetime
 from decimal import Decimal
 
-from app.core.database import Base
-from sqlalchemy import DateTime, ForeignKey, Integer, Numeric, String, UUID, func
+from sqlalchemy import UUID, DateTime, ForeignKey, Integer, Numeric, String, func
 from sqlalchemy.orm import Mapped, mapped_column
+
+from app.core.database import Base
 
 
 class Orders(Base):
     __tablename__ = "orders"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
-    user_id: Mapped[UUID] = mapped_column(
+    user_id: Mapped[uuid.UUID] = mapped_column(
         UUID,
         ForeignKey("users.user_id", ondelete="CASCADE"),
         nullable=False,

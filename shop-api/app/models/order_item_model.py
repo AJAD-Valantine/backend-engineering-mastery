@@ -1,8 +1,10 @@
 from decimal import Decimal
 
-from app.core.database import Base
 from sqlalchemy import ForeignKey, Integer, Numeric
 from sqlalchemy.orm import Mapped, mapped_column
+
+from app.core.database import Base
+
 
 class OrderItems(Base):
     __tablename__ = "order_items"
