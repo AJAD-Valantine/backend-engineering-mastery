@@ -1,9 +1,10 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 
 from app.core.dependencies import db_connection, get_current_user
 from app.models.user_model import Users
 from app.schemas.product_schema import (
+    PaginatedProductResponse,
     ProductCreateRequest,
     ProductUpdateRequest,
 )
@@ -25,8 +26,13 @@ def create_product(
 
 # 🌍 Public Route (No token required)
 @product_router.get("/")
-def get_all_products(db: Session = Depends(db_connection)): 
-    return product_service.get_all_products(db)
+@product_router.get("/", response_model=PaginatedProductResponse)
+def get_all_products(
+    page: int = Query(1, ge=1, description="Page number"),
+    size: int = Query(10, ge=1, le=100, description="Items per page"),
+    db: Session = Depends(db_connection)
+): 
+    return product_service.get_all_products(db, page=page, size=size)
 
 
 # 🌍 Public Route (No token required)

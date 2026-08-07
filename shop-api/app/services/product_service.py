@@ -1,10 +1,10 @@
 from app.exceptions.product_exceptions import ProductNotFound
 from app.models.product_model import Products
+from app.repository.product_repository import ProductRepository
 from app.schemas.product_schema import (
     ProductCreateRequest,
     ProductUpdateRequest,
 )
-from app.repository.product_repository import ProductRepository
 
 
 class ProductService:
@@ -23,9 +23,18 @@ class ProductService:
 
         return self.product_repository.create_product(db, data)
 
-    def get_all_products(self, db):
-
-        return self.product_repository.read_all_products(db)
+    def get_all_products(self, db, page: int = 1, size: int = 10):
+        
+        skip = (page - 1) * size
+        
+        total_items, products = self.product_repository.read_all_products(db, skip=skip, limit=size)
+        
+        return {
+            "total_items": total_items,
+            "page": page,
+            "size": size,
+            "data": products
+        }
 
     def get_product_by_id(self, db, product_id: int):
 

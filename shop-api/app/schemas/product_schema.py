@@ -1,5 +1,4 @@
 from datetime import datetime
-from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -30,3 +29,9 @@ class ProductResponse(BaseModel):
     created_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
+
+class PaginatedProductResponse(BaseModel):
+    total_items: int
+    page: int
+    size: int
+    data: list[ProductResponse]
