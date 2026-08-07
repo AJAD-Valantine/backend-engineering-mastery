@@ -32,15 +32,9 @@ class UserRepository:
 
         return db.query(Users).filter(Users.email == email).first()
 
-    def update_user(
-        self, db: Session, user_id: UUID, request: UserUpdateRequest
-    ):
+    def update_user(self, db: Session, user_id: UUID, update_data : dict):
 
-        user = (
-            db.query(Users).filter(Users.user_id == user_id).first()
-        )
-
-        update_data = request.model_dump(exclude_unset=True)
+        user = (db.query(Users).filter(Users.user_id == user_id).first())
 
         if user is not None:
             for key, value in update_data.items():
@@ -48,7 +42,8 @@ class UserRepository:
 
             db.commit()
             db.refresh(user)
-            return user
+
+        return user
 
     def delete_user(self, db: Session, user_id):
 

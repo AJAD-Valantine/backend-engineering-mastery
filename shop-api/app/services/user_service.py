@@ -69,7 +69,9 @@ class UserService:
         if user is None:
             raise UserNotFound("user not found")
 
-        return self.user_repository.update_user(db, user_id, request)
+        update_data = request.model_dump(exclude_unset=True)
+
+        return self.user_repository.update_user(db, user_id, update_data)
 
     def remove_user(self, db, user_id):
 
