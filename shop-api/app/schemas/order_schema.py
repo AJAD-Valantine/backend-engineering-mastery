@@ -21,3 +21,9 @@ class OrderResponse(BaseModel):
     created_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
+
+class PaginatedOrderResponse(BaseModel):
+    total_items: int
+    page: int
+    size: int
+    data: list[OrderResponse]

@@ -1,13 +1,14 @@
 from decimal import Decimal
 from uuid import UUID
 
+from sqlalchemy.orm import Session
+
 from app.exceptions.order_exceptions import CartIsEmpty, OrderNotFound
 from app.models.order_item_model import OrderItems
 from app.models.order_model import Orders
 from app.repository.order_repository import OrderRepository
 from app.services.cart_item_service import CartItemService
 from app.services.product_service import ProductService
-from sqlalchemy.orm import Session
 
 
 class OrderService:
@@ -63,8 +64,18 @@ class OrderService:
         
         return new_order
 
-    def get_all_orders(self, db: Session):
-        return self.order_repository.read_all_orders(db)
+    def get_all_orders(self, db: Session, page: int = 1, size: int = 10):
+        
+        skip = (page - 1) * size
+        
+        total_items, orders = self.order_repository.read_all_orders(db, skip=skip, limit=size)
+        
+        return {
+            "total_items": total_items,
+            "page": page,
+            "size": size,
+            "data": orders
+        }
     
     def get_order_by_id(self, db: Session, order_id: int, current_user):
         order = self.order_repository.read_order_by_id(db, order_id)

@@ -1,9 +1,9 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 
 from app.core.dependencies import db_connection, get_current_user
 from app.models.user_model import Users
-from app.schemas.order_schema import OrderUpdateRequest
+from app.schemas.order_schema import OrderUpdateRequest, PaginatedOrderResponse
 from app.services.order_service import OrderService
 
 order_router = APIRouter(prefix="/orders", tags=["Orders"])
@@ -20,12 +20,14 @@ def create_order(
 
 
 # 🚨 Admin Only (RBAC pending)
-@order_router.get("/")
+@order_router.get("/", response_model=PaginatedOrderResponse)
 def get_orders(
+    page: int = Query(1, ge=1, description="Page number"),
+    size: int = Query(10, ge=1, le=100, description="Items per page"),
     db: Session = Depends(db_connection),
     current_user: Users = Depends(get_current_user)
 ): 
-    return order_service.get_all_orders(db)
+    return order_service.get_all_orders(db, page=page, size=size)
 
 
 # ✅ Standard User Route

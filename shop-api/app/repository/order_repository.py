@@ -1,5 +1,6 @@
 from uuid import UUID
 
+from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from app.models.order_item_model import OrderItems
@@ -19,8 +20,13 @@ class OrderRepository:
         db.commit()
         return order_items
 
-    def read_all_orders(self, db: Session):
-        return db.query(Orders).all()
+    def read_all_orders(self, db: Session, skip: int = 0, limit: int = 10):
+
+        total_items = db.query(func.count(Orders.id)).scalar()
+        
+        orders = db.query(Orders).offset(skip).limit(limit).all()
+        
+        return total_items, orders
     
     def read_order_by_id(self, db: Session, order_id: int):
         return db.query(Orders).filter(Orders.id == order_id).first()
