@@ -39,3 +39,11 @@ class UserResponse(BaseModel):
     created_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
+
+class PaginatedUserResponse(BaseModel):
+    
+    users: list[UserResponse]
+    total: int
+    page : int
+    size : int
+    has_more : bool

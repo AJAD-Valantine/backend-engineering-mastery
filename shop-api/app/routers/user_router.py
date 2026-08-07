@@ -1,12 +1,13 @@
 from uuid import UUID
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 
 from app.core.dependencies import db_connection, get_current_user
 from app.models.user_model import Users
 from app.schemas.user_schema import (
     AdminCreateUserRequest,
+    PaginatedUserResponse,
     UserUpdateRequest,
 )
 from app.services.user_service import UserService
@@ -26,12 +27,14 @@ def create_user(
 
 
 # 🚨 Admin Only (RBAC pending)
-@user_router.get("/get-all-users")
+@user_router.get("/get-all-users", response_model=PaginatedUserResponse)
 def get_all_users(
+    page: int = Query(1, ge=1, description="Page number"),
+    size: int = Query(10, ge=1, le=100, description="Items per page"),
     db: Session = Depends(db_connection),
     current_user: Users = Depends(get_current_user)
 ):
-    return user_service.get_all_users(db)
+    return user_service.get_all_users(db, page=page, size=size)
 
 
 # ✅ Standard User Route (View own profile)

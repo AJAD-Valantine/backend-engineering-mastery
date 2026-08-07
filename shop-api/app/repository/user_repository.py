@@ -1,5 +1,6 @@
 from uuid import UUID
 
+from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from app.models.user_model import Users
@@ -7,6 +8,7 @@ from app.schemas.user_schema import UserUpdateRequest
 
 
 class UserRepository:
+    
     def create_user(self, db: Session, user: Users):
 
         db.add(user)
@@ -14,9 +16,13 @@ class UserRepository:
         db.refresh(user)
         return user
 
-    def read_all_users(self, db: Session):
+    def read_all_users(self, db: Session, skip: int = 0, limit: int = 10):
 
-        return db.query(Users).all()
+        total_items = db.query(func.count(Users.user_id)).scalar()
+        
+        users = db.query(Users).offset(skip).limit(limit).all()
+        
+        return total_items, users
 
     def read_user_by_id(self, db: Session, user_id: UUID):
 

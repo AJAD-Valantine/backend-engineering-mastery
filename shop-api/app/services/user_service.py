@@ -11,6 +11,7 @@ from app.schemas.user_schema import (
 
 
 class UserService:
+    
     def __init__(self) -> None:
         self.user_repository = UserRepository()
 
@@ -39,9 +40,18 @@ class UserService:
 
         return self.user_repository.create_user(db, data)
 
-    def get_all_users(self, db):
-
-        return self.user_repository.read_all_users(db)
+    def get_all_users(self, db, page: int = 1, size: int = 10):
+        
+        skip = (page - 1) * size
+        
+        total_items, users = self.user_repository.read_all_users(db, skip=skip, limit=size)
+        
+        return {
+            "total_items": total_items,
+            "page": page,
+            "size": size,
+            "data": users
+        }
 
     def get_user_by_id(self, db, user_id):
 
