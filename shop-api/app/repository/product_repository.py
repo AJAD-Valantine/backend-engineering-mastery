@@ -2,7 +2,6 @@ from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from app.models.product_model import Products
-from app.schemas.product_schema import ProductUpdateRequest
 
 
 class ProductRepository:
@@ -25,13 +24,9 @@ class ProductRepository:
 
         return db.query(Products).filter(Products.product_id == product_id).first()
 
-    def update_product(
-        self, db: Session, product_id: int, request: ProductUpdateRequest
-    ):
+    def update_product(self, db: Session, product_id: int, update_data: dict):
 
         product = db.query(Products).filter(Products.product_id == product_id).first()
-
-        update_data = request.model_dump(exclude_unset=True)
 
         if product is not None:
             for key, value in update_data.items():
@@ -40,7 +35,7 @@ class ProductRepository:
             db.commit()
             db.refresh(product)
 
-            return product
+        return product
 
     def delete_product(self, db: Session, product_id: int):
 

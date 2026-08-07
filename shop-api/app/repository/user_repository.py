@@ -4,7 +4,6 @@ from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from app.models.user_model import Users
-from app.schemas.user_schema import UserUpdateRequest
 
 
 class UserRepository:

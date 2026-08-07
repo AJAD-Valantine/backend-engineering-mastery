@@ -45,14 +45,16 @@ class ProductService:
 
         return product
 
-    def update_product(self, db, product_id, product: ProductUpdateRequest):
+    def update_product(self, db, product_id, request: ProductUpdateRequest):
 
         product_result = self.product_repository.read_product_by_id(db, product_id)
 
         if product_result is None:
             raise ProductNotFound("product not found")
 
-        return self.product_repository.update_product(db, product_id, product)
+        update_data = request.model_dump(exclude_unset=True)
+
+        return self.product_repository.update_product(db, product_id, update_data)
 
     def remove_product(self, db, product_id):
 

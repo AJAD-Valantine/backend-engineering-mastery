@@ -25,7 +25,6 @@ def create_product(
 
 
 # 🌍 Public Route (No token required)
-@product_router.get("/")
 @product_router.get("/", response_model=PaginatedProductResponse)
 def get_all_products(
     page: int = Query(1, ge=1, description="Page number"),
