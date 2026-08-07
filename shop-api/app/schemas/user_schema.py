@@ -42,8 +42,7 @@ class UserResponse(BaseModel):
 
 class PaginatedUserResponse(BaseModel):
     
-    users: list[UserResponse]
-    total: int
-    page : int
-    size : int
-    has_more : bool
+    total_items: int
+    page: int
+    size: int
+    data: list[UserResponse]
