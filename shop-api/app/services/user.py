@@ -15,19 +15,21 @@ class UserService:
     def __init__(self) -> None:
         self.user_repository = UserRepository()
 
-    def add_user(self, db, user: UserCreateRequest, role : str = "customer"):
+    def add_user(
+            self,
+            db,
+            user: UserCreateRequest,
+            role : str = "customer"
+    ):
 
-        if (
-            self.user_repository.read_user_by_email(db, user.email)
-            is not None
-        ):
+        if self.user_repository.read_user_by_email(db, user.email) is not None:
             raise EmailAlreadyExits("email already exits.")
 
         user_id = uuid.uuid4()
 
         hashed_password = hash_password(user.password)
 
-        data = Users(
+        user = Users(
             user_id=user_id,
             first_name=user.first_name,
             last_name=user.last_name,
@@ -38,13 +40,17 @@ class UserService:
             role=role
         )
 
-        return self.user_repository.create_user(db, data)
+        return self.user_repository.create_user(db=db, user=user)
 
-    def get_all_users(self, db, page: int = 1, size: int = 10):
-        
+    def get_all_users(
+            self,
+            db,
+            page: int = 1,
+            size: int = 10
+    ):
+
         skip = (page - 1) * size
-        
-        total_items, users = self.user_repository.read_all_users(db, skip=skip, limit=size)
+        total_items, users = self.user_repository.read_all_users(db=db, skip=skip, limit=size)
         
         return {
             "total_items": total_items,
@@ -53,7 +59,11 @@ class UserService:
             "data": users
         }
 
-    def get_user_by_id(self, db, user_id):
+    def get_user_by_id(
+            self,
+            db,
+            user_id
+    ):
 
         user = self.user_repository.read_user_by_id(db, user_id)
 
@@ -62,7 +72,12 @@ class UserService:
 
         return user
 
-    def update_user(self, db, user_id, request: UserUpdateRequest):
+    def update_user(
+            self,
+            db,
+            user_id,
+            request: UserUpdateRequest
+    ):
 
         user = self.user_repository.read_user_by_id(db, user_id)
 
@@ -71,7 +86,11 @@ class UserService:
 
         update_data = request.model_dump(exclude_unset=True)
 
-        return self.user_repository.update_user(db, user_id, update_data)
+        return self.user_repository.update_user(
+            db=db,
+            user_id=user_id,
+            update_data=update_data
+        )
 
     def remove_user(self, db, user_id):
 
