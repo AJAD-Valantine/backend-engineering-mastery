@@ -8,10 +8,15 @@ from app.schemas.product import (
 
 
 class ProductService:
+
     def __init__(self) -> None:
         self.product_repository = ProductRepository()
 
-    def add_product(self, db, product: ProductCreateRequest):
+    def add_product(
+            self,
+            db,
+            product: ProductCreateRequest
+    ):
 
         data = Products(
             name=product.name,
@@ -21,12 +26,18 @@ class ProductService:
             category=product.category,
         )
 
-        return self.product_repository.create_product(db, data)
+        return self.product_repository.create_product(
+                                            db=db,
+                                            product=data)
 
-    def get_all_products(self, db, page: int = 1, size: int = 10):
+    def get_all_products(
+            self,
+            db,
+            page: int = 1,
+            size: int = 10
+    ):
         
         skip = (page - 1) * size
-        
         total_items, products = self.product_repository.read_all_products(db, skip=skip, limit=size)
         
         return {
@@ -36,7 +47,11 @@ class ProductService:
             "data": products
         }
 
-    def get_product_by_id(self, db, product_id: int):
+    def get_product_by_id(
+            self,
+            db,
+            product_id: int
+    ):
 
         product = self.product_repository.read_product_by_id(db, product_id)
 
@@ -45,7 +60,12 @@ class ProductService:
 
         return product
 
-    def update_product(self, db, product_id, request: ProductUpdateRequest):
+    def update_product(
+            self,
+            db,
+            product_id,
+            request: ProductUpdateRequest
+    ):
 
         product_result = self.product_repository.read_product_by_id(db, product_id)
 
@@ -54,9 +74,16 @@ class ProductService:
 
         update_data = request.model_dump(exclude_unset=True)
 
-        return self.product_repository.update_product(db, product_id, update_data)
+        return self.product_repository.update_product(
+            db=db,
+            product_id=product_id,
+            update_data=update_data
+        )
 
-    def remove_product(self, db, product_id):
+    def remove_product(
+            self,
+            db,
+            product_id):
 
         product_result = self.product_repository.read_product_by_id(db, product_id)
 

@@ -5,26 +5,45 @@ from app.models.product import Products
 
 
 class ProductRepository:
-    def create_product(self, db: Session, product: Products):
+
+    def create_product(
+            self,
+            db: Session,
+            product: Products
+    ):
 
         db.add(product)
         db.commit()
         db.refresh(product)
+
         return product
 
-    def read_all_products(self, db: Session, skip: int = 0, limit: int = 10):
+    def read_all_products(
+            self,
+            db: Session,
+            skip: int = 0,
+            limit: int = 10
+    ):
 
         total_items = db.query(func.count(Products.product_id)).scalar()
-        
         products = db.query(Products).offset(skip).limit(limit).all()
         
         return total_items, products
 
-    def read_product_by_id(self, db: Session, product_id: int):
+    def read_product_by_id(
+            self,
+            db: Session,
+            product_id: int
+    ):
 
         return db.query(Products).filter(Products.product_id == product_id).first()
 
-    def update_product(self, db: Session, product_id: int, update_data: dict):
+    def update_product(
+            self,
+            db: Session,
+            product_id: int,
+            update_data: dict
+    ):
 
         product = db.query(Products).filter(Products.product_id == product_id).first()
 
@@ -37,7 +56,11 @@ class ProductRepository:
 
         return product
 
-    def delete_product(self, db: Session, product_id: int):
+    def delete_product(
+            self,
+            db: Session,
+            product_id: int
+    ):
 
         product = db.query(Products).filter(Products.product_id == product_id).first()
 
