@@ -1,20 +1,21 @@
 from uuid import UUID
 
-from app.exceptions.cart_item_exceptions import (
+from app.exceptions.cart_item import (
     CartItemNotFound,
     NotEnoughStockAvailable,
 )
-from app.models.cart_item_model import CartItems
-from app.schemas.cart_item_schema import (
+from app.models.cart_item import CartItems
+from app.repository.cart_item import CartItemRepository
+from app.schemas.cart_item import (
     CartItemCreateRequest,
     CartItemUpdateRequest,
 )
-from app.repository.cart_item_repository import CartItemRepository
-from app.services.product_service import ProductService
-from app.services.user_service import UserService
+from app.services.product import ProductService
+from app.services.user import UserService
 
 
 class CartItemService:
+
     def __init__(self) -> None:
         self.cart_item_repository = CartItemRepository()
         self.user_service = UserService()
@@ -70,9 +71,7 @@ class CartItemService:
 
         return cart_item
 
-    def update_quantity(
-        self, db, cart_item_id, update_cart_item: CartItemUpdateRequest
-    ):
+    def update_quantity(self, db, cart_item_id, update_cart_item: CartItemUpdateRequest):
 
         cart_item = self.view_cart_item_by_id(db, cart_item_id)
 

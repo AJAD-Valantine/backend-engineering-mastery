@@ -1,10 +1,10 @@
 import uuid
 
 from app.core.security import hash_password
-from app.exceptions.user_exceptions import EmailAlreadyExits, UserNotFound
-from app.models.user_model import Users
-from app.repository.user_repository import UserRepository
-from app.schemas.user_schema import (
+from app.exceptions.user import EmailAlreadyExits, UserNotFound
+from app.models.user import Users
+from app.repository.user import UserRepository
+from app.schemas.user import (
     UserCreateRequest,
     UserUpdateRequest,
 )

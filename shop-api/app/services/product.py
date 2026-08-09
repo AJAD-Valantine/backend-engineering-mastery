@@ -1,7 +1,7 @@
-from app.exceptions.product_exceptions import ProductNotFound
-from app.models.product_model import Products
-from app.repository.product_repository import ProductRepository
-from app.schemas.product_schema import (
+from app.exceptions.product import ProductNotFound
+from app.models.product import Products
+from app.repository.product import ProductRepository
+from app.schemas.product import (
     ProductCreateRequest,
     ProductUpdateRequest,
 )

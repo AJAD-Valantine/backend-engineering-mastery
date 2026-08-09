@@ -1,13 +1,13 @@
 # Import the custom exceptions you just made
-from app.exceptions.payment_exceptions import (
+from app.exceptions.payment import (
     InvalidPaymentAmount,
     PaymentAlreadyExists,
     PaymentNotFound,
 )
-from app.models.payment_model import Payments
-from app.schemas.payment_schema import PaymentCreateRequest
-from app.repository.payment_repository import PaymentRepository
-from app.services.order_service import OrderService
+from app.models.payment import Payments
+from app.schemas.payment import PaymentCreateRequest
+from app.repository.payment import PaymentRepository
+from app.services.order import OrderService
 from sqlalchemy.orm import Session
 
 

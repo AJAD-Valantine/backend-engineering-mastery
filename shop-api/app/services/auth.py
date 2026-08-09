@@ -1,14 +1,14 @@
 from sqlalchemy.orm import Session
 
 from app.core import security
-from app.exceptions.user_exceptions import (
-    InvalidCredentials,  # Import the new exception
+from app.exceptions.user import (
+    InvalidCredentials,
 )
-from app.models.user_model import Users
-from app.schemas.auth_schema import Token  # Import the Token schema
-from app.schemas.user_schema import UserCreateRequest
-from app.repository.user_repository import UserRepository
-from app.services.user_service import UserService
+from app.models.user import Users
+from app.schemas.auth import Token
+from app.schemas.user import UserCreateRequest
+from app.repository.user import UserRepository
+from app.services.user import UserService
 
 
 class AuthService:

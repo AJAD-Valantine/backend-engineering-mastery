@@ -3,12 +3,12 @@ from uuid import UUID
 
 from sqlalchemy.orm import Session
 
-from app.exceptions.order_exceptions import CartIsEmpty, OrderNotFound
-from app.models.order_item_model import OrderItems
-from app.models.order_model import Orders
-from app.repository.order_repository import OrderRepository
-from app.services.cart_item_service import CartItemService
-from app.services.product_service import ProductService
+from app.exceptions.order import CartIsEmpty, OrderNotFound
+from app.models.order_item import OrderItems
+from app.models.order import Orders
+from app.repository.order import OrderRepository
+from app.services.cart_item import CartItemService
+from app.services.product import ProductService
 
 
 class OrderService:
@@ -37,7 +37,7 @@ class OrderService:
 
         for cart_item in cart_items:
             
-            product = self.product_service.get_product_by_id(db, cart_item.product_id)
+            product = self.product.get_product_by_id(db, cart_item.product_id)
             
             sub_total = cart_item.quantity * product.price
             total_order_amount += sub_total
