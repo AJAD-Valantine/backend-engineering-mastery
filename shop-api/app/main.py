@@ -2,12 +2,12 @@ from fastapi import FastAPI
 
 from app.core.database import init_models
 from app.exceptions.handlers import register_exception_handlers
-from app.routers.auth import auth as auth_router
-from app.routers.cart_item import cart_item as cart_item_router
-from app.routers.order import order as order_router
-from app.routers.payment import payment as payment_router
-from app.routers.product import product as product_router
-from app.routers.user import user as user_router
+from app.routers.auth import auth_router
+from app.routers.cart_item import cart_item_router
+from app.routers.order import order_router
+from app.routers.payment import payment_router
+from app.routers.product import product_router
+from app.routers.user import user_router
 
 app = FastAPI()
 
