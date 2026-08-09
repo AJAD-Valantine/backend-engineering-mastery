@@ -1,6 +1,6 @@
 from fastapi import status
 
-from app.exceptions.base_exception import ShopException
+from app.exceptions.base import ShopException
 
 
 class UserNotFound(ShopException):

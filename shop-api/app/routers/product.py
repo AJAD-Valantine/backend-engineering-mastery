@@ -2,13 +2,13 @@ from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 
 from app.core.dependencies import db_connection, get_current_user
-from app.models.user_model import Users
-from app.schemas.product_schema import (
+from app.models.user import Users
+from app.schemas.product import (
     PaginatedProductResponse,
     ProductCreateRequest,
     ProductUpdateRequest,
 )
-from app.services.product_service import ProductService
+from app.services.product import ProductService
 
 product_router = APIRouter(prefix="/products", tags=["Products"])
 product_service = ProductService()

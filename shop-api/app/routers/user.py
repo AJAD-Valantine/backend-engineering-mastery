@@ -4,13 +4,13 @@ from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 
 from app.core.dependencies import db_connection, get_current_user
-from app.models.user_model import Users
-from app.schemas.user_schema import (
+from app.models.user import Users
+from app.schemas.user import (
     AdminCreateUserRequest,
     PaginatedUserResponse,
     UserUpdateRequest,
 )
-from app.services.user_service import UserService
+from app.services.user import UserService
 
 user_router = APIRouter(prefix="/users", tags=["Users"])
 user_service = UserService()

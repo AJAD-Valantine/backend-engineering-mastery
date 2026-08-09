@@ -2,9 +2,9 @@ from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 
 from app.core.dependencies import db_connection, get_current_user
-from app.models.user_model import Users
-from app.schemas.order_schema import OrderUpdateRequest, PaginatedOrderResponse
-from app.services.order_service import OrderService
+from app.models.user import Users
+from app.schemas.order import OrderUpdateRequest, PaginatedOrderResponse
+from app.services.order import OrderService
 
 order_router = APIRouter(prefix="/orders", tags=["Orders"])
 order_service = OrderService()

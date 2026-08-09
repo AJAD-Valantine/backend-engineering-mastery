@@ -3,8 +3,8 @@ from uuid import UUID
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 
-from app.models.order_item_model import OrderItems
-from app.models.order_model import Orders
+from app.models.order_item import OrderItems
+from app.models.order import Orders
 
 
 class OrderRepository:

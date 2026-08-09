@@ -2,12 +2,12 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.core.dependencies import db_connection, get_current_user
-from app.models.user_model import Users
-from app.schemas.payment_schema import (
+from app.models.user import Users
+from app.schemas.payment import (
     PaymentCreateRequest,
     PaymentUpdateRequest,
 )
-from app.services.payment_service import PaymentService
+from app.services.payment import PaymentService
 
 payment_router = APIRouter(tags=["Payments"])
 payment_service = PaymentService()

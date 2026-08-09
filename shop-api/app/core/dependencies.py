@@ -6,8 +6,8 @@ from sqlalchemy.orm import Session
 
 from app.core import security
 from app.core.database import SessionLocal
-from app.repository.user_repository import UserRepository
-from app.schemas.auth_schema import TokenData
+from app.repository.user import UserRepository
+from app.schemas.auth import TokenData
 
 # --- DATABASE DEPENDENCY ---
 

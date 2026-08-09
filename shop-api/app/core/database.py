@@ -18,7 +18,7 @@ class Base(DeclarativeBase):
     pass
 
 # Creating DB Tables
-from app.models import cart_item_model, product_model, order_item_model, order_model, payment_model, user_model #noqa
+from app.models import cart_item, product, order_item, order, payment, user #noqa
 
 def init_models():
 

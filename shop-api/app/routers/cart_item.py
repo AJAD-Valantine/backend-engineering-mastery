@@ -2,12 +2,12 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.core.dependencies import db_connection, get_current_user
-from app.models.user_model import Users
-from app.schemas.cart_item_schema import (
+from app.models.user import Users
+from app.schemas.cart_item import (
     CartItemCreateRequest,
     CartItemUpdateRequest,
 )
-from app.services.cart_item_service import CartItemService
+from app.services.cart_item import CartItemService
 
 cart_item_router = APIRouter(tags=["Cart Items"])
 cart_item_service = CartItemService()

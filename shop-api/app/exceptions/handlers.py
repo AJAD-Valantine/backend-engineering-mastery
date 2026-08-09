@@ -1,7 +1,7 @@
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 
-from app.exceptions.base_exception import ShopException
+from app.exceptions.base import ShopException
 
 
 async def shop_exception_handler(request: Request, exc: ShopException): 

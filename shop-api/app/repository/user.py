@@ -3,7 +3,7 @@ from uuid import UUID
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 
-from app.models.user_model import Users
+from app.models.user import Users
 
 
 class UserRepository:

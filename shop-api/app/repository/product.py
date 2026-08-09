@@ -1,7 +1,7 @@
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 
-from app.models.product_model import Products
+from app.models.product import Products
 
 
 class ProductRepository:
