@@ -1,4 +1,3 @@
-# Import the custom exceptions you just made
 from app.exceptions.payment import (
     InvalidPaymentAmount,
     PaymentAlreadyExists,
@@ -12,15 +11,22 @@ from sqlalchemy.orm import Session
 
 
 class PaymentService:
+
     def __init__(self):
         self.payment_repository = PaymentRepository()
         self.order_service = OrderService()
 
-    def add_payment(self, db: Session, request: PaymentCreateRequest, current_user):
+    def add_payment(
+            self,
+            db: Session,
+            request: PaymentCreateRequest,
+            current_user
+    ):
         
         order = self.order_service.get_order_by_id(db, request.order_id, current_user)
 
         existing_payment = self.payment_repository.read_payment_by_order_id(db, request.order_id)
+
         if existing_payment:
             raise PaymentAlreadyExists(f"A payment already exists for Order ID {request.order_id}")
 
@@ -38,7 +44,12 @@ class PaymentService:
         return self.payment_repository.create_payment(db, new_payment)
 
 
-    def get_payment_by_id(self, db: Session, payment_id: int, current_user):
+    def get_payment_by_id(
+            self,
+            db: Session,
+            payment_id: int,
+            current_user
+    ):
         payment = self.payment_repository.read_payment_by_id(db, payment_id)
         if not payment:
             raise PaymentNotFound(f"Payment with ID {payment_id} not found")
@@ -48,7 +59,12 @@ class PaymentService:
         return payment
 
 
-    def get_payment_by_order_id(self, db: Session, order_id: int, current_user):
+    def get_payment_by_order_id(
+            self,
+            db: Session,
+            order_id: int,
+            current_user
+    ):
         self.order_service.get_order_by_id(db, order_id, current_user)
 
         payment = self.payment_repository.read_payment_by_order_id(db, order_id)
@@ -58,8 +74,15 @@ class PaymentService:
         return payment
 
 
-    def update_payment_status(self, db: Session, payment_id: int, status: str):
+    def update_payment_status(
+            self,
+            db: Session,
+            payment_id: int,
+            status: str
+    ):
         payment = self.payment_repository.update_payment_status(db, payment_id, status)
+
         if not payment:
             raise PaymentNotFound(f"Payment with ID {payment_id} not found")
+
         return payment
