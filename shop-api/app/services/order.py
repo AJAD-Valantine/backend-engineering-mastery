@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 from app.exceptions.order import CartIsEmpty, OrderNotFound
 from app.models.order_item import OrderItems
 from app.models.order import Orders
+from app.repository.cart_item import CartItemRepository
 from app.repository.order import OrderRepository
 from app.services.cart_item import CartItemService
 from app.services.product import ProductService
@@ -16,10 +17,15 @@ class OrderService:
     def __init__(self):
         self.order_repository = OrderRepository()
         self.cart_service = CartItemService()
+        self.cart_repository = CartItemRepository()
         self.product_service = ProductService()
 
     
-    def checkout(self, db: Session, user_id: UUID):
+    def checkout(
+            self,
+            db: Session,
+            user_id: UUID
+    ):
         
         cart_items = self.cart_service.view_cart(db, user_id)
         
@@ -37,7 +43,7 @@ class OrderService:
 
         for cart_item in cart_items:
             
-            product = self.product.get_product_by_id(db, cart_item.product_id)
+            product = self.product_service.get_product_by_id(db, cart_item.product_id)
             
             sub_total = cart_item.quantity * product.price
             total_order_amount += sub_total
@@ -49,11 +55,11 @@ class OrderService:
                 unit_price=product.price,
                 sub_total=sub_total
             )
+
             order_items_list.append(new_order_item)
-            
             product.stock_quantity -= cart_item.quantity
             
-            db.delete(cart_item)
+            self.cart_repository.remove_cart_item_for_checkout(db, cart_item)
 
         self.order_repository.create_order_items(db, order_items_list)
         
@@ -64,10 +70,14 @@ class OrderService:
         
         return new_order
 
-    def get_all_orders(self, db: Session, page: int = 1, size: int = 10):
-        
+    def get_all_orders(
+            self,
+            db: Session,
+            page: int = 1,
+            size: int = 10
+    ):
+
         skip = (page - 1) * size
-        
         total_items, orders = self.order_repository.read_all_orders(db, skip=skip, limit=size)
         
         return {
@@ -77,21 +87,38 @@ class OrderService:
             "data": orders
         }
     
-    def get_order_by_id(self, db: Session, order_id: int, current_user):
+    def get_order_by_id(
+            self,
+            db: Session,
+            order_id: int,
+            user_id: UUID
+    ):
         order = self.order_repository.read_order_by_id(db, order_id)
-        if not order:
-            raise OrderNotFound(f"Order with ID {order_id} not found")
-        if order.user_id != current_user.user_id and current_user.role != "admin":
+
+        if order is None or order.user_id != user_id:
             raise OrderNotFound(f"Order with ID {order_id} not found")  
         
         return order
 
-    def get_user_orders(self, db: Session, user_id: UUID):
+    def get_user_orders(
+            self,
+            db: Session,
+            user_id: UUID
+    ):
         return self.order_repository.read_order_by_user_id(db, user_id)
     
-    def update_order_status(self, db: Session, order_id: int, status_update: str):
+    def update_order_status(
+            self,
+            db: Session,
+            order_id: int,
+            status_update: str
+    ):
+
+        order = self.order_repository.read_order_by_id(db, order_id)
+
+        if order is None:
+            raise OrderNotFound(f"Order with ID {order_id} not found")
         
         order = self.order_repository.update_status(db, order_id, status_update)
-        if not order:
-            raise OrderNotFound(f"Order with ID {order_id} not found")
+
         return order

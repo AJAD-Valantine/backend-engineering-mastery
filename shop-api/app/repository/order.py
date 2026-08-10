@@ -9,32 +9,58 @@ from app.models.order import Orders
 
 class OrderRepository:
 
-    def create_order(self, db: Session, order: Orders):
+    def create_order(
+            self,
+            db: Session,
+            order: Orders
+    ):
         db.add(order)
-        db.commit()
+        db.flush()
         db.refresh(order)
+
         return order
 
-    def create_order_items(self, db: Session, order_items: list[OrderItems]):
+    def create_order_items(
+            self,
+            db: Session,
+            order_items: list[OrderItems]
+    ):
         db.add_all(order_items)
-        db.commit()
+
         return order_items
 
-    def read_all_orders(self, db: Session, skip: int = 0, limit: int = 10):
+    def read_all_orders(
+            self,
+            db: Session,
+            skip: int = 0,
+            limit: int = 10
+    ):
 
         total_items = db.query(func.count(Orders.id)).scalar()
-        
         orders = db.query(Orders).offset(skip).limit(limit).all()
         
         return total_items, orders
     
-    def read_order_by_id(self, db: Session, order_id: int):
+    def read_order_by_id(
+            self,
+            db: Session,
+            order_id: int
+    ):
         return db.query(Orders).filter(Orders.id == order_id).first()
 
-    def read_order_by_user_id(self, db: Session, user_id: UUID):
+    def read_order_by_user_id(
+            self,
+            db: Session,
+            user_id: UUID
+    ):
         return db.query(Orders).filter(Orders.user_id == user_id).all()
     
-    def update_status(self, db: Session, order_id: int, status: str):
+    def update_status(
+            self,
+            db: Session,
+            order_id: int,
+            status: str
+    ):
         order = self.read_order_by_id(db, order_id)
         
         if order is None:
@@ -43,4 +69,5 @@ class OrderRepository:
         order.status = status
         db.commit()
         db.refresh(order)
+
         return order

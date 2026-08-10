@@ -66,3 +66,11 @@ class CartItemRepository:
             db.commit()
 
         return cart_item
+
+
+    def remove_cart_item_for_checkout(
+            self,
+            db : Session,
+            cart_item
+    ):
+        db.delete(cart_item)
