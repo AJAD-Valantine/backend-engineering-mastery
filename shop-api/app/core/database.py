@@ -16,10 +16,3 @@ SessionLocal = sessionmaker(autocommit=False,
 # Base Class
 class Base(DeclarativeBase):
     pass
-
-# Creating DB Tables
-from app.models import cart_item, product, order_item, order, payment, user #noqa
-
-def init_models():
-
-    Base.metadata.create_all(bind=engine)

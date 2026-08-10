@@ -1,6 +1,5 @@
 from fastapi import FastAPI
 
-from app.core.database import init_models
 from app.exceptions.handlers import register_exception_handlers
 from app.routers.auth import auth_router
 from app.routers.cart_item import cart_item_router
@@ -10,8 +9,6 @@ from app.routers.product import product_router
 from app.routers.user import user_router
 
 app = FastAPI()
-
-init_models()
 
 register_exception_handlers(app)
 
