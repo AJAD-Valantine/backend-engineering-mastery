@@ -1,8 +1,147 @@
-combined_code.txt
-.venv
-.vscode
+# =========================
+# Python
+# =========================
+
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Python build / packaging
+build/
+dist/
+*.egg-info/
+.eggs/
+pip-wheel-metadata/
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+
+# =========================
+# Environment / Secrets
+# =========================
+
 .env
+.env.*
+!.env.example
+
+# =========================
+# IDEs / Editors
+# =========================
+
+.vscode/
+.idea/
+*.iml
+
+# =========================
+# OS Files
+# =========================
+
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# =========================
+# Testing
+# =========================
+
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.nox/
+
+# =========================
+# Type Checkers / Linters
+# =========================
+
+.mypy_cache/
+.pyright/
+.ruff_cache/
+
+# =========================
+# Jupyter
+# =========================
+
+.ipynb_checkpoints/
+
+# =========================
+# Logs
+# =========================
+
+*.log
+logs/
+
+# =========================
+# Temporary Files
+# =========================
+
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
+
+# =========================
+# Database / Local Data
+# =========================
+
+*.db
+*.sqlite
+*.sqlite3
+
+# =========================
+# Alembic
+# =========================
+
+# DO NOT ignore alembic migrations.
+# They are part of your source code.
+
+# =========================
+# Docker
+# =========================
+
+docker-compose.override.yml
+
+# =========================
+# Coverage / Reports
+# =========================
+
+coverage.xml
+coverage.json
+.pytest_cache/
+
+# =========================
+# Secrets / Certificates
+# =========================
+
+*.pem
+*.key
+*.crt
+
+# =========================
+# Generated Files
+# =========================
+
+*.generated.py
+
+# =========================
+# Local Configuration
+# =========================
+
+.local/
+.localenv/
+
+# =========================
+# For this project only
+# =========================
+
 pyproject.toml
 files.py
-.gitignore
-files.py
+requirements.txt
+combined_code.txt

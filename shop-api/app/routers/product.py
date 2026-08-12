@@ -85,7 +85,6 @@ def update_product(
 # RBAC pending
 @product_router.delete(
     path="/{product_id}",
-    response_model=ProductResponse,
     status_code=status.HTTP_204_NO_CONTENT,
     summary="Delete a product",
     dependencies=[Depends(get_current_user)],

@@ -1,76 +1,49 @@
 from uuid import UUID
-
 from sqlalchemy.orm import Session
-
+from app.models.cart import Carts
 from app.models.cart_item import CartItems
 
+class CartRepository:
 
-class CartItemRepository:
+    def get_cart_by_user_id(self, db: Session, user_id: UUID):
+        return db.query(Carts).filter(Carts.user_id == user_id).first()
 
-    def create_cart_item(
-            self,
-            db : Session,
-            cart_item : CartItems
-    ):
+    def create_cart(self, db: Session, user_id: UUID):
+        new_cart = Carts(user_id=user_id)
+        db.add(new_cart)
+        db.commit()
+        db.refresh(new_cart)
+        return new_cart
 
+    def get_cart_items(self, db: Session, cart_id: int):
+        return db.query(CartItems).filter(CartItems.cart_id == cart_id).all()
+
+    def get_cart_item_by_id(self, db: Session, item_id: int):
+        return db.query(CartItems).filter(CartItems.cart_item_id == item_id).first()
+
+    def get_item_in_cart_by_product(self, db: Session, cart_id: int, product_id: int):
+        return db.query(CartItems).filter(
+            CartItems.cart_id == cart_id,
+            CartItems.product_id == product_id
+        ).first()
+
+    def add_item_to_cart(self, db: Session, cart_item: CartItems):
         db.add(cart_item)
         db.commit()
         db.refresh(cart_item)
-
         return cart_item
-    
-    def read_cart(
-            self,
-            db : Session,
-            user_id : UUID
-    ):
 
-        return db.query(CartItems).filter(CartItems.user_id == user_id).all()
-    
-    def read_cart_item_by_id(
-            self,
-            db : Session,
-            cart_item_id : int
-    ):
-
-        return db.query(CartItems).filter(CartItems.cart_id == cart_item_id).first()
-    
-    def update_quantity(
-            self,
-            db : Session,
-            cart_item_id : int,
-            quantity: int
-    ):
-
-        cart_item = self.read_cart_item_by_id(db, cart_item_id)
-
-        if cart_item is not None:
-            cart_item.quantity = quantity
+    def update_item_quantity(self, db: Session, item_id: int, quantity: int):
+        item = self.get_cart_item_by_id(db, item_id)
+        if item:
+            item.quantity = quantity
             db.commit()
-            db.refresh(cart_item)
+            db.refresh(item)
+        return item
 
-        return cart_item
-    
-    def delete_cart_item(
-            self,
-            db : Session,
-            cart_item_id : int
-    ):
-        cart_item = self.read_cart_item_by_id(
-            db,
-            cart_item_id
-        )
-
-        if cart_item is not None:
-            db.delete(cart_item)
+    def delete_cart_item(self, db: Session, item_id: int):
+        item = self.get_cart_item_by_id(db, item_id)
+        if item:
+            db.delete(item)
             db.commit()
-
-        return cart_item
-
-
-    def remove_cart_item_for_checkout(
-            self,
-            db : Session,
-            cart_item
-    ):
-        db.delete(cart_item)
+        return item

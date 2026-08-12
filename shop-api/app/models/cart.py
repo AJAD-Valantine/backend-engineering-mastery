@@ -1,0 +1,19 @@
+import uuid
+from datetime import datetime
+
+from sqlalchemy import UUID, DateTime, ForeignKey, Integer, func
+from sqlalchemy.orm import Mapped, mapped_column
+
+from app.core.database import Base
+
+class Carts(Base):
+    __tablename__ = "carts"
+
+    cart_id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        UUID,
+        ForeignKey("users.user_id", ondelete="CASCADE"),
+        nullable=False,
+        unique=True,
+    )
+    created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())

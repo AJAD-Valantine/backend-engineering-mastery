@@ -81,7 +81,6 @@ def update_user(
 # RBAC pending
 @user_router.delete(
     path="/{user_id}",
-    response_model=UserResponse,
     status_code=status.HTTP_204_NO_CONTENT,
     summary="Delete a user",
     dependencies=[Depends(get_current_user)],
