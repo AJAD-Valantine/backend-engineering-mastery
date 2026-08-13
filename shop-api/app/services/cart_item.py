@@ -21,7 +21,6 @@ class CartService:
         return cart
 
     def add_to_cart(self, db, user_id: UUID, request: CartItemCreateRequest):
-        self.user_service.get_user_by_id(db, user_id)
         product = self.product_service.get_product_by_id(db, request.product_id)
 
         if product.stock_quantity < request.quantity:

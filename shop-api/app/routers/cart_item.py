@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from starlette import status
 
-from app.core.dependencies import db_connection, get_current_user
+from app.core.dependencies import get_db, get_current_user
 from app.models.user import Users
 from app.schemas.cart_item import (
     CartItemCreateRequest,
@@ -14,6 +14,7 @@ from app.services.cart_item import CartService
 cart_item_router = APIRouter(tags=["Cart"])
 cart_service = CartService()
 
+# Standard User Route
 @cart_item_router.post(
     path="/my-cart/items",
     response_model=CartItemResponse,
@@ -22,7 +23,7 @@ cart_service = CartService()
 )
 def add_cart_item(
     request: CartItemCreateRequest,
-    db: Session = Depends(db_connection),
+    db: Session = Depends(get_db),
     current_user: Users = Depends(get_current_user)
 ):
     return cart_service.add_to_cart(
@@ -31,7 +32,7 @@ def add_cart_item(
         request=request
     )
 
-
+# Standard User Route
 @cart_item_router.get(
     path="/my-cart",
     response_model=list[CartItemResponse],
@@ -39,7 +40,7 @@ def add_cart_item(
     summary="Get all items in my cart",
 )
 def view_cart(
-    db: Session = Depends(db_connection),
+    db: Session = Depends(get_db),
     current_user: Users = Depends(get_current_user)
 ):
     return cart_service.view_cart(
@@ -47,7 +48,7 @@ def view_cart(
         user_id=current_user.user_id
     )
 
-
+# Standard User Route
 @cart_item_router.get(
     path="/my-cart/items/{item_id}",
     response_model=CartItemResponse,
@@ -56,7 +57,7 @@ def view_cart(
 )
 def get_cart_item(
     item_id: int,
-    db: Session = Depends(db_connection),
+    db: Session = Depends(get_db),
     current_user: Users = Depends(get_current_user)
 ):
     return cart_service.view_cart_item_by_id(
@@ -65,7 +66,7 @@ def get_cart_item(
         item_id=item_id,
     )
 
-
+# Standard User Route
 @cart_item_router.patch(
     path="/my-cart/items/{item_id}",
     response_model=CartItemResponse,
@@ -75,7 +76,7 @@ def get_cart_item(
 def update_cart_item(
     item_id: int,
     request: CartItemUpdateRequest,
-    db: Session = Depends(db_connection),
+    db: Session = Depends(get_db),
     current_user: Users = Depends(get_current_user)
 ):
     return cart_service.update_quantity(
@@ -85,7 +86,7 @@ def update_cart_item(
         request=request
     )
 
-
+# Standard User Route
 @cart_item_router.delete(
     path="/my-cart/items/{item_id}",
     status_code=status.HTTP_204_NO_CONTENT,
@@ -93,7 +94,7 @@ def update_cart_item(
 )
 def remove_cart_item(
     item_id: int,
-    db: Session = Depends(db_connection),
+    db: Session = Depends(get_db),
     current_user: Users = Depends(get_current_user)
 ):
     return cart_service.remove_cart_item(
