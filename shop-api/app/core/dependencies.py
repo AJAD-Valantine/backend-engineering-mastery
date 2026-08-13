@@ -66,5 +66,3 @@ def require_admin(
         raise PermissionDenied
 
     return current_user
-
-AdminUser = Annotated[Users, Depends(require_admin)]

@@ -1,9 +1,9 @@
 from uuid import UUID
 
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, Query, Depends
 from starlette import status
 
-from app.core.dependencies import DBSession, AdminUser, CurrentUser
+from app.core.dependencies import DBSession, require_admin, CurrentUser
 from app.schemas.user import (
     AdminCreateUserRequest,
     PaginatedUserResponse,
@@ -22,7 +22,7 @@ user_service = UserService()
     response_model=UserResponse,
     status_code=status.HTTP_201_CREATED,
     summary="Create a new user",
-    dependencies=[AdminUser],
+    dependencies=[Depends(require_admin)],
 )
 def create_user(
     request:AdminCreateUserRequest, 
@@ -37,7 +37,7 @@ def create_user(
     response_model=PaginatedUserResponse,
     status_code=status.HTTP_200_OK,
     summary="Get all users",
-    dependencies=[AdminUser],
+    dependencies=[Depends(require_admin)],
 )
 def get_all_users(
     db: DBSession,
@@ -82,7 +82,7 @@ def update_user(
     path="/{user_id}",
     status_code=status.HTTP_204_NO_CONTENT,
     summary="Delete a user",
-    dependencies=[AdminUser],
+    dependencies=[Depends(require_admin)],
 )
 def delete_user(
     user_id: UUID,

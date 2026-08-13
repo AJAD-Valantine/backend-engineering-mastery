@@ -1,7 +1,7 @@
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, Query, Depends
 from starlette import status
 
-from app.core.dependencies import DBSession, AdminUser
+from app.core.dependencies import DBSession, require_admin
 from app.schemas.product import (
     PaginatedProductResponse,
     ProductCreateRequest,
@@ -20,7 +20,7 @@ product_service = ProductService()
     response_model=ProductResponse,
     status_code=status.HTTP_201_CREATED,
     summary="Create a new product",
-    dependencies=[AdminUser],
+    dependencies=[Depends(require_admin)],
 )
 def create_product(
     request: ProductCreateRequest, 
@@ -68,7 +68,7 @@ def get_product(
     response_model=ProductResponse,
     status_code=status.HTTP_200_OK,
     summary="Update a product",
-    dependencies=[AdminUser],
+    dependencies=[Depends(require_admin)],
 )
 def update_product(
     product_id: int, 
@@ -87,7 +87,7 @@ def update_product(
     path="/{product_id}",
     status_code=status.HTTP_204_NO_CONTENT,
     summary="Delete a product",
-    dependencies=[AdminUser],
+    dependencies=[Depends(require_admin)],
 )
 def delete_product(
     product_id: int, 
