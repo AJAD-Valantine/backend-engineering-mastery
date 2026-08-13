@@ -1,9 +1,7 @@
-from fastapi import APIRouter, Depends
-from sqlalchemy.orm import Session
+from fastapi import APIRouter
 from starlette import status
 
-from app.core.dependencies import get_db, get_current_user
-from app.models.user import Users
+from app.core.dependencies import DBSession, CurrentUser
 from app.schemas.cart_item import (
     CartItemCreateRequest,
     CartItemUpdateRequest,
@@ -23,8 +21,8 @@ cart_service = CartService()
 )
 def add_cart_item(
     request: CartItemCreateRequest,
-    db: Session = Depends(get_db),
-    current_user: Users = Depends(get_current_user)
+    db: DBSession,
+    current_user: CurrentUser
 ):
     return cart_service.add_to_cart(
         db=db,
@@ -40,8 +38,8 @@ def add_cart_item(
     summary="Get all items in my cart",
 )
 def view_cart(
-    db: Session = Depends(get_db),
-    current_user: Users = Depends(get_current_user)
+    db: DBSession,
+    current_user: CurrentUser
 ):
     return cart_service.view_cart(
         db=db,
@@ -57,8 +55,8 @@ def view_cart(
 )
 def get_cart_item(
     item_id: int,
-    db: Session = Depends(get_db),
-    current_user: Users = Depends(get_current_user)
+    db: DBSession,
+    current_user: CurrentUser
 ):
     return cart_service.view_cart_item_by_id(
         db=db,
@@ -76,8 +74,8 @@ def get_cart_item(
 def update_cart_item(
     item_id: int,
     request: CartItemUpdateRequest,
-    db: Session = Depends(get_db),
-    current_user: Users = Depends(get_current_user)
+    db: DBSession,
+    current_user: CurrentUser
 ):
     return cart_service.update_quantity(
         db=db,
@@ -94,8 +92,8 @@ def update_cart_item(
 )
 def remove_cart_item(
     item_id: int,
-    db: Session = Depends(get_db),
-    current_user: Users = Depends(get_current_user)
+    db: DBSession,
+    current_user: CurrentUser
 ):
     return cart_service.remove_cart_item(
         db=db,

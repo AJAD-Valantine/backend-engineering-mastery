@@ -1,8 +1,7 @@
-from fastapi import APIRouter, Depends, Query
-from sqlalchemy.orm import Session
+from fastapi import APIRouter, Query
 from starlette import status
 
-from app.core.dependencies import get_db, require_admin
+from app.core.dependencies import DBSession, AdminUser
 from app.schemas.product import (
     PaginatedProductResponse,
     ProductCreateRequest,
@@ -21,11 +20,11 @@ product_service = ProductService()
     response_model=ProductResponse,
     status_code=status.HTTP_201_CREATED,
     summary="Create a new product",
-    dependencies=[Depends(require_admin)],
+    dependencies=[AdminUser],
 )
 def create_product(
     request: ProductCreateRequest, 
-    db: Session = Depends(get_db),
+    db: DBSession,
 ):
     return product_service.add_product(db, request)
 
@@ -38,9 +37,10 @@ def create_product(
     summary="Get all products",
 )
 def get_all_products(
+    db: DBSession,
     page: int = Query(default=1, ge=1, description="Page number"),
     size: int = Query(default=10, ge=1, le=100, description="Items per page"),
-    db: Session = Depends(get_db)
+
 ): 
     return product_service.get_all_products(
         db=db,
@@ -57,7 +57,7 @@ def get_all_products(
 )
 def get_product(
         product_id: int,
-        db: Session = Depends(get_db)
+        db: DBSession
 ):
     return product_service.get_product_by_id(db, product_id)
 
@@ -68,12 +68,12 @@ def get_product(
     response_model=ProductResponse,
     status_code=status.HTTP_200_OK,
     summary="Update a product",
-    dependencies=[Depends(require_admin)],
+    dependencies=[AdminUser],
 )
 def update_product(
     product_id: int, 
     request: ProductUpdateRequest, 
-    db: Session = Depends(get_db),
+    db: DBSession,
 ):
     return product_service.update_product(
         db=db,
@@ -87,10 +87,10 @@ def update_product(
     path="/{product_id}",
     status_code=status.HTTP_204_NO_CONTENT,
     summary="Delete a product",
-    dependencies=[Depends(require_admin)],
+    dependencies=[AdminUser],
 )
 def delete_product(
     product_id: int, 
-    db: Session = Depends(get_db),
+    db: DBSession,
 ):
     return product_service.remove_product(db, product_id)
