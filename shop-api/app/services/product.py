@@ -9,12 +9,11 @@ from app.schemas.product import (
 
 class ProductService:
 
-    def __init__(self) -> None:
-        self.product_repository = ProductRepository()
+    def __init__(self, product_repository : ProductRepository) -> None:
+        self.product_repository = product_repository
 
     def add_product(
             self,
-            db,
             product: ProductCreateRequest
     ):
 
@@ -26,19 +25,19 @@ class ProductService:
             category=product.category,
         )
 
-        return self.product_repository.create_product(
-                                            db=db,
-                                            product=data)
+        return self.product_repository.create_product(data)
 
     def get_all_products(
             self,
-            db,
             page: int = 1,
             size: int = 10
     ):
         
         skip = (page - 1) * size
-        total_items, products = self.product_repository.read_all_products(db, skip=skip, limit=size)
+        total_items, products = self.product_repository.read_all_products(
+            skip=skip,
+            limit=size
+        )
         
         return {
             "total_items": total_items,
@@ -49,11 +48,10 @@ class ProductService:
 
     def get_product_by_id(
             self,
-            db,
             product_id: int
     ):
 
-        product = self.product_repository.read_product_by_id(db, product_id)
+        product = self.product_repository.read_product_by_id(product_id)
 
         if product is None:
             raise ProductNotFound("product not found")
@@ -62,12 +60,11 @@ class ProductService:
 
     def update_product(
             self,
-            db,
             product_id,
             request: ProductUpdateRequest
     ):
 
-        product_result = self.product_repository.read_product_by_id(db, product_id)
+        product_result = self.product_repository.read_product_by_id(product_id)
 
         if product_result is None:
             raise ProductNotFound("product not found")
@@ -75,19 +72,17 @@ class ProductService:
         update_data = request.model_dump(exclude_unset=True)
 
         return self.product_repository.update_product(
-            db=db,
             product_id=product_id,
             update_data=update_data
         )
 
     def remove_product(
             self,
-            db,
             product_id):
 
-        product_result = self.product_repository.read_product_by_id(db, product_id)
+        product_result = self.product_repository.read_product_by_id(product_id)
 
         if product_result is None:
             raise ProductNotFound("product not found")
 
-        return self.product_repository.delete_product(db, product_id)
+        return self.product_repository.delete_product(product_id)

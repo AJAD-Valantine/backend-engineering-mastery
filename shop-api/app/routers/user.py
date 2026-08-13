@@ -3,7 +3,7 @@ from uuid import UUID
 from fastapi import APIRouter, Query, Depends
 from starlette import status
 
-from app.core.dependencies import DBSession, require_admin, CurrentUser
+from app.core.dependencies import require_admin, CurrentUser, get_user_service
 from app.schemas.user import (
     AdminCreateUserRequest,
     PaginatedUserResponse,
@@ -13,7 +13,6 @@ from app.schemas.user import (
 from app.services.user import UserService
 
 user_router = APIRouter(prefix="/users", tags=["Users"])
-user_service = UserService()
 
 
 # Admin Only
@@ -25,10 +24,11 @@ user_service = UserService()
     dependencies=[Depends(require_admin)],
 )
 def create_user(
-    request:AdminCreateUserRequest, 
-    db: DBSession,
+    request : AdminCreateUserRequest,
+    user_service : UserService = Depends(get_user_service)
+
 ):  
-    return user_service.add_user(db, request, request.role)
+    return user_service.add_user(request, request.role)
 
 
 # Admin Only
@@ -40,12 +40,12 @@ def create_user(
     dependencies=[Depends(require_admin)],
 )
 def get_all_users(
-    db: DBSession,
     page: int = Query(default=1, ge=1, description="Page number"),
     size: int = Query(default=10, ge=1, le=100, description="Items per page"),
+    user_service : UserService = Depends(get_user_service)
 
 ):
-    return user_service.get_all_users(db=db, page=page, size=size)
+    return user_service.get_all_users(page=page, size=size)
 
 
 # Standard User Route
@@ -56,10 +56,10 @@ def get_all_users(
     summary="Get my profile",
 )
 def get_user(
-    db: DBSession,
-    current_user: CurrentUser
+    current_user: CurrentUser,
+    user_service : UserService = Depends(get_user_service)
 ): 
-    return user_service.get_user_by_id(db, current_user.user_id)
+    return user_service.get_user_by_id(current_user.user_id)
 
 
 # Standard User Route
@@ -70,11 +70,11 @@ def get_user(
     summary="Update my profile",
 )
 def update_user(
-    request: UserUpdateRequest, 
-    db: DBSession,
-    current_user: CurrentUser
+    request: UserUpdateRequest,
+    current_user: CurrentUser,
+    user_service : UserService = Depends(get_user_service)
 ):  
-    return user_service.update_user(db, current_user.user_id, request)
+    return user_service.update_user(current_user.user_id, request)
 
 
 # Admin Only
@@ -86,6 +86,6 @@ def update_user(
 )
 def delete_user(
     user_id: UUID,
-    db: DBSession,
+    user_service : UserService = Depends(get_user_service)
 ):
-    return user_service.remove_user(db, user_id)
+    return user_service.remove_user(user_id)

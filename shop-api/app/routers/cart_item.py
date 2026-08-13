@@ -1,7 +1,7 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 from starlette import status
 
-from app.core.dependencies import DBSession, CurrentUser
+from app.core.dependencies import CurrentUser, get_cart_service
 from app.schemas.cart_item import (
     CartItemCreateRequest,
     CartItemUpdateRequest,
@@ -10,7 +10,6 @@ from app.schemas.cart_item import (
 from app.services.cart_item import CartService
 
 cart_item_router = APIRouter(tags=["Cart"])
-cart_service = CartService()
 
 # Standard User Route
 @cart_item_router.post(
@@ -21,11 +20,10 @@ cart_service = CartService()
 )
 def add_cart_item(
     request: CartItemCreateRequest,
-    db: DBSession,
-    current_user: CurrentUser
+    current_user: CurrentUser,
+    cart_service : CartService = Depends(get_cart_service)
 ):
     return cart_service.add_to_cart(
-        db=db,
         user_id=current_user.user_id,
         request=request
     )
@@ -38,13 +36,10 @@ def add_cart_item(
     summary="Get all items in my cart",
 )
 def view_cart(
-    db: DBSession,
-    current_user: CurrentUser
+    current_user: CurrentUser,
+    cart_service : CartService = Depends(get_cart_service)
 ):
-    return cart_service.view_cart(
-        db=db,
-        user_id=current_user.user_id
-    )
+    return cart_service.view_cart(current_user.user_id)
 
 # Standard User Route
 @cart_item_router.get(
@@ -55,11 +50,10 @@ def view_cart(
 )
 def get_cart_item(
     item_id: int,
-    db: DBSession,
-    current_user: CurrentUser
+    current_user: CurrentUser,
+    cart_service : CartService = Depends(get_cart_service)
 ):
     return cart_service.view_cart_item_by_id(
-        db=db,
         user_id=current_user.user_id,
         item_id=item_id,
     )
@@ -74,11 +68,10 @@ def get_cart_item(
 def update_cart_item(
     item_id: int,
     request: CartItemUpdateRequest,
-    db: DBSession,
-    current_user: CurrentUser
+    current_user: CurrentUser,
+    cart_service : CartService = Depends(get_cart_service)
 ):
     return cart_service.update_quantity(
-        db=db,
         user_id=current_user.user_id,
         item_id=item_id,
         request=request
@@ -92,11 +85,10 @@ def update_cart_item(
 )
 def remove_cart_item(
     item_id: int,
-    db: DBSession,
-    current_user: CurrentUser
+    current_user: CurrentUser,
+    cart_service : CartService = Depends(get_cart_service)
 ):
     return cart_service.remove_cart_item(
-        db=db,
         user_id=current_user.user_id,
         item_id=item_id,
     )

@@ -1,12 +1,11 @@
-from fastapi import APIRouter, status
+from fastapi import APIRouter, status, Depends
 
-from app.core.dependencies import DBSession, OAuth2Form
+from app.core.dependencies import OAuth2Form, get_auth_service
 from app.schemas.auth import Token
 from app.schemas.user import UserCreateRequest, UserResponse
 from app.services.auth import AuthService
 
 auth_router = APIRouter(prefix="/auth", tags=["Authentication"])
-auth_service = AuthService()
 
 @auth_router.post(
     path="/register",
@@ -16,10 +15,10 @@ auth_service = AuthService()
 )
 def register_user(
         request: UserCreateRequest,
-        db: DBSession
+        auth_service : AuthService = Depends(get_auth_service)
 ):
 
-    return auth_service.register_user(db, request)
+    return auth_service.register_user(request)
 
 @auth_router.post(
     path="/login",
@@ -28,12 +27,11 @@ def register_user(
     summary="User log in"
 )
 def login_user(
-        db: DBSession,
         form_data: OAuth2Form,
+        auth_service : AuthService = Depends(get_auth_service)
 ):
 
     return auth_service.authenticate_user(
-        db,
         form_data.username,
         form_data.password
     )

@@ -1,5 +1,3 @@
-from sqlalchemy.orm import Session
-
 from app.core import security
 from app.exceptions.user import InvalidCredentials
 from app.models.user import Users
@@ -10,21 +8,40 @@ from app.services.user import UserService
 
 
 class AuthService:
-    def __init__(self):
-        self.user_repository = UserRepository()
-        self.user_service = UserService()
 
-    def register_user(self, db: Session, request: UserCreateRequest) -> Users:
+    def __init__(
+            self,
+            user_repository : UserRepository,
+            user_service : UserService
+    ):
+        self.user_repository = user_repository
+        self.user_service = user_service
 
-        return self.user_service.add_user(db, request)     
+    def register_user(
+            self,
+            request: UserCreateRequest
+    ) -> Users:
 
-    def authenticate_user(self, db: Session, email: str, plain_password: str) -> Token:
-        user = self.user_repository.read_user_by_email(db, email)
+        return self.user_service.add_user(request)
 
-        if user is None or not security.verify_password(plain_password, user.hashed_password):
+    def authenticate_user(
+            self,
+            email: str,
+            plain_password: str
+    ) -> Token:
+
+        user = self.user_repository.read_user_by_email(email)
+
+        if user is None or not security.verify_password(
+                plain_password,
+                user.hashed_password
+        ):
             raise InvalidCredentials
         
         payload = {"sub": str(user.user_id)}
         token = security.create_access_token(payload)
 
-        return Token(access_token=token, token_type="bearer")
+        return Token(
+            access_token=token,
+            token_type="bearer"
+        )

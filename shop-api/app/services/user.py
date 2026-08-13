@@ -12,17 +12,16 @@ from app.schemas.user import (
 
 class UserService:
     
-    def __init__(self) -> None:
-        self.user_repository = UserRepository()
+    def __init__(self, user_repository : UserRepository) -> None:
+        self.user_repository = user_repository
 
     def add_user(
             self,
-            db,
             user: UserCreateRequest,
             role : str = "customer"
     ):
 
-        if self.user_repository.read_user_by_email(db, user.email) is not None:
+        if self.user_repository.read_user_by_email(user.email) is not None:
             raise EmailAlreadyExits("email already exits.")
 
         user_id = uuid.uuid4()
@@ -40,17 +39,19 @@ class UserService:
             role=role
         )
 
-        return self.user_repository.create_user(db=db, user=user)
+        return self.user_repository.create_user(user)
 
     def get_all_users(
             self,
-            db,
             page: int = 1,
             size: int = 10
     ):
 
         skip = (page - 1) * size
-        total_items, users = self.user_repository.read_all_users(db=db, skip=skip, limit=size)
+        total_items, users = self.user_repository.read_all_users(
+            skip=skip,
+            limit=size
+        )
         
         return {
             "total_items": total_items,
@@ -61,11 +62,10 @@ class UserService:
 
     def get_user_by_id(
             self,
-            db,
             user_id
     ):
 
-        user = self.user_repository.read_user_by_id(db, user_id)
+        user = self.user_repository.read_user_by_id(user_id)
 
         if user is None:
             raise UserNotFound("user not found")
@@ -74,12 +74,11 @@ class UserService:
 
     def update_user(
             self,
-            db,
             user_id,
             request: UserUpdateRequest
     ):
 
-        user = self.user_repository.read_user_by_id(db, user_id)
+        user = self.user_repository.read_user_by_id(user_id)
 
         if user is None:
             raise UserNotFound("user not found")
@@ -87,16 +86,18 @@ class UserService:
         update_data = request.model_dump(exclude_unset=True)
 
         return self.user_repository.update_user(
-            db=db,
             user_id=user_id,
             update_data=update_data
         )
 
-    def remove_user(self, db, user_id):
+    def remove_user(
+            self,
+            user_id
+    ):
 
-        user = self.user_repository.read_user_by_id(db, user_id)
+        user = self.user_repository.read_user_by_id(user_id)
 
         if user is None:
             raise UserNotFound("user not found")
 
-        return self.user_repository.delete_user(db, user_id)
+        return self.user_repository.delete_user(user_id)
