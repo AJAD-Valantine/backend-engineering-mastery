@@ -35,7 +35,7 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None) -> s
 
     return encoded_jwt
 
-def verify_access_token(token : str) -> str | None:
+def verify_access_token(token : str) -> dict[str,str] | None:
 
     try:
         decoded_jwt = decode(
@@ -49,4 +49,7 @@ def verify_access_token(token : str) -> str | None:
         return None
 
     else:
-        return decoded_jwt.get("sub")
+        return {
+            "user_id" : decoded_jwt["sub"],
+            "expire_at" : decoded_jwt["exp"]
+        }

@@ -1,18 +1,19 @@
 from uuid import UUID
 
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
 
 from app.core import security
 from app.core.database import SessionLocal
+from app.exceptions.user import InvalidCredentials, PermissionDenied
+from app.models import Users
 from app.repository.user import UserRepository
-from app.schemas.auth import TokenData
 
 # --- DATABASE DEPENDENCY ---
 
-def db_connection():
-    """Yields a database session and closes it after the request finishes."""
+def get_db():
+
     db = SessionLocal()
     try:
         yield db
@@ -23,36 +24,40 @@ def db_connection():
 # --- AUTHENTICATION DEPENDENCY ---
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
+def get_current_user(
+        token: str = Depends(oauth2_scheme),
+        db: Session = Depends(get_db)
+):
 
-def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(db_connection)): 
-    """The Bouncer: Intercepts the token, decodes it, and returns the database User."""
+    result = security.verify_access_token(token)
 
-    credentials_exception = HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Could not validate credentials",
-        headers={"WWW-Authenticate": "Bearer"},
-    )
+    if result is None:
+        raise InvalidCredentials
 
-    user_id_str = security.verify_access_token(token)
-
-    if user_id_str is None:
-        raise credentials_exception
+    str_user_id = result["user_id"]
 
     try:
-        valid_uuid = UUID(user_id_str)
+        valid_uuid = UUID(str_user_id)
     except ValueError:
-        raise credentials_exception
-        
-    token_data = TokenData(id=valid_uuid)
-
-    if token_data.id is None:
-        raise credentials_exception
+        raise InvalidCredentials
 
     user_repo = UserRepository()
 
-    user = user_repo.read_user_by_id(db, token_data.id)
+    user = user_repo.read_user_by_id(db, valid_uuid)
     
     if user is None:
-        raise credentials_exception
+        raise InvalidCredentials
 
     return user
+
+# --- AUTHORIZATION DEPENDENCIES ---
+
+# - Admin Dependency
+
+def require_admin(
+        current_user : Users = Depends(get_current_user)
+):
+    if current_user.role.lower() != "admin":
+        raise PermissionDenied
+
+    return current_user
