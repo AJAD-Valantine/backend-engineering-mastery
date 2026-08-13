@@ -1,7 +1,8 @@
+from typing import Annotated
 from uuid import UUID
 
 from fastapi import Depends
-from fastapi.security import OAuth2PasswordBearer
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 
 from app.core import security
@@ -20,13 +21,14 @@ def get_db():
     finally:
         db.close()
 
+DBSession = Annotated[Session, Depends(get_db)]
 
 # --- AUTHENTICATION DEPENDENCY ---
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 def get_current_user(
+        db: DBSession,
         token: str = Depends(oauth2_scheme),
-        db: Session = Depends(get_db)
 ):
 
     result = security.verify_access_token(token)
@@ -50,14 +52,19 @@ def get_current_user(
 
     return user
 
+OAuth2Form = Annotated[OAuth2PasswordRequestForm, Depends()]
+CurrentUser = Annotated[Users, Depends(get_current_user)]
+
 # --- AUTHORIZATION DEPENDENCIES ---
 
 # - Admin Dependency
 
 def require_admin(
-        current_user : Users = Depends(get_current_user)
+        current_user : CurrentUser
 ):
     if current_user.role.lower() != "admin":
         raise PermissionDenied
 
     return current_user
+
+AdminUser = Annotated[Users, Depends(require_admin)]
