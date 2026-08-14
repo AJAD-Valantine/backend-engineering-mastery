@@ -28,5 +28,15 @@ class Settings(BaseSettings):
     algorithm: str = "HS256"
     access_token_expire_minutes: int = 30
 
+    # Password Reset and BG Tasks
+
+    mail_server: str
+    mail_port: int = 587
+    mail_username: str
+    mail_password: SecretStr
+    mail_from: str
+    mail_use_tls: bool = True
+    reset_token_expire_minutes: int = 60
+
 
 settings = Settings()  # type: ignore[call-arg]

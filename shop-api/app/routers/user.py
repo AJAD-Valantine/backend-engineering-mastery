@@ -3,13 +3,15 @@ from uuid import UUID
 from fastapi import APIRouter, Query, Depends
 from starlette import status
 
-from app.core.dependencies import require_admin, CurrentUser, get_user_service
+from app.core.dependencies import require_admin, CurrentUser, get_user_service, get_auth_service
+from app.schemas.auth import ChangePasswordRequest
 from app.schemas.user import (
     AdminCreateUserRequest,
     PaginatedUserResponse,
     UserUpdateRequest,
     UserResponse,
 )
+from app.services.auth import AuthService
 from app.services.user import UserService
 
 user_router = APIRouter(prefix="/users", tags=["Users"])
@@ -75,6 +77,19 @@ def update_user(
     user_service : UserService = Depends(get_user_service)
 ):  
     return user_service.update_user(current_user.user_id, request)
+
+# Standard User Route
+@user_router.patch(
+    path="/me/password",
+    status_code=status.HTTP_200_OK
+)
+def change_password(
+    request: ChangePasswordRequest,
+    current_user: CurrentUser,
+    auth_service: AuthService = Depends(get_auth_service),
+):
+    auth_service.change_password(current_user.user_id, request.current_password, request.new_password)
+    return {"message": "Password changed successfully"}
 
 
 # Admin Only

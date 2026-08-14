@@ -22,3 +22,11 @@ class InvalidCredentials(ShopException):
 class PermissionDenied(ShopException):
     def __init__(self, message: str = "You do not have permission to perform this action"):
         super().__init__(message, status_code=status.HTTP_403_FORBIDDEN)
+
+class InvalidOrExpiredResetToken(ShopException):
+    def __init__(self, message: str = "Invalid or expired reset token"):
+        super().__init__(message, status_code=status.HTTP_400_BAD_REQUEST)
+
+class IncorrectPassword(ShopException):
+    def __init__(self, message: str = "Current password is incorrect"):
+        super().__init__(message, status_code=status.HTTP_400_BAD_REQUEST)

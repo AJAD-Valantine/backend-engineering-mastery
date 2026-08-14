@@ -10,6 +10,7 @@ from app.core.database import SessionLocal
 from app.exceptions.user import InvalidCredentials, PermissionDenied
 from app.models import Users
 from app.repository.cart_item import CartRepository
+from app.repository.password_reset_token import PasswordResetTokenRepository
 from app.repository.product import ProductRepository
 from app.repository.user import UserRepository
 from app.services.auth import AuthService
@@ -81,15 +82,22 @@ def get_cart_service(
         product_service=product_service
     )
 
+# --- AUTH REPOSITORY DEPENDENCY ---
+
+def get_password_reset_token_repository(db: DBSession):
+    return PasswordResetTokenRepository(db)
+
 # --- AUTH SERVICE DEPENDENCY ---
 
 def get_auth_service(
-        user_repository : UserRepository = Depends(get_user_repository),
-        user_service : UserService = Depends(get_user_service)
+    user_repository: UserRepository = Depends(get_user_repository),
+    user_service: UserService = Depends(get_user_service),
+    reset_token_repository: PasswordResetTokenRepository = Depends(get_password_reset_token_repository),
 ):
     return AuthService(
         user_repository=user_repository,
-        user_service=user_service
+        user_service=user_service,
+        reset_token_repository=reset_token_repository,
     )
 
 # --- AUTHENTICATION DEPENDENCY ---
