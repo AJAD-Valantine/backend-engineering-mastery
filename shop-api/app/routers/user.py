@@ -1,15 +1,22 @@
 from uuid import UUID
 
-from fastapi import APIRouter, Query, Depends
+from fastapi import APIRouter, Depends, Query, UploadFile
 from starlette import status
 
-from app.core.dependencies import require_admin, CurrentUser, get_user_service, get_auth_service
+from app.core.config import settings
+from app.core.dependencies import (
+    CurrentUser,
+    get_auth_service,
+    get_user_service,
+    require_admin,
+)
+from app.exceptions.image import FileTooLarge
 from app.schemas.auth import ChangePasswordRequest
 from app.schemas.user import (
     AdminCreateUserRequest,
     PaginatedUserResponse,
-    UserUpdateRequest,
     UserResponse,
+    UserUpdateRequest,
 )
 from app.services.auth import AuthService
 from app.services.user import UserService
@@ -29,7 +36,8 @@ def create_user(
     request : AdminCreateUserRequest,
     user_service : UserService = Depends(get_user_service)
 
-):  
+):
+
     return user_service.add_user(request, request.role)
 
 
@@ -104,3 +112,31 @@ def delete_user(
     user_service : UserService = Depends(get_user_service)
 ):
     return user_service.remove_user(user_id)
+
+# Standard User Route
+@user_router.patch(
+    path="/me/picture",
+    response_model=UserResponse,
+    status_code=status.HTTP_200_OK
+)
+def upload_profile_picture(
+        current_user: CurrentUser,
+        file: UploadFile,
+        user_service: UserService = Depends(get_user_service),
+):
+    if file.size and file.size > settings.max_upload_size_bytes:
+        raise FileTooLarge()
+
+    content = file.file.read()
+    return user_service.upload_profile_image(current_user.user_id, content)
+
+# Standard User Route
+@user_router.delete(
+    path="/me/picture",
+    status_code=status.HTTP_204_NO_CONTENT
+)
+def delete_profile_picture(
+        current_user: CurrentUser,
+        user_service: UserService = Depends(get_user_service),
+):
+    user_service.remove_profile_image(current_user.user_id)

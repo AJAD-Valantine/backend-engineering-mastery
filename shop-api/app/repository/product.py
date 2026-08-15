@@ -6,13 +6,17 @@ from app.models.product import Products
 
 class ProductRepository:
 
-    def __init__(self, db : Session):
+    def __init__(
+            self,
+            db : Session
+    ) -> None:
+
         self.db = db
 
     def create_product(
             self,
             product: Products
-    ):
+    ) -> Products:
 
         self.db.add(product)
         self.db.commit()
@@ -24,7 +28,7 @@ class ProductRepository:
             self,
             skip: int = 0,
             limit: int = 10
-    ):
+    ) -> tuple[int, list[Products]]:
 
         total_items = self.db.query(func.count(Products.product_id)).scalar()
         products = self.db.query(Products).offset(skip).limit(limit).all()
@@ -34,7 +38,7 @@ class ProductRepository:
     def read_product_by_id(
             self,
             product_id: int
-    ):
+    ) -> Products | None:
 
         return self.db.query(Products).filter(Products.product_id == product_id).first()
 
@@ -42,7 +46,7 @@ class ProductRepository:
             self,
             product_id: int,
             update_data: dict
-    ):
+    ) -> Products:
 
         product = self.db.query(Products).filter(Products.product_id == product_id).first()
 
@@ -58,11 +62,9 @@ class ProductRepository:
     def delete_product(
             self,
             product_id: int
-    ):
+    ) -> Products:
 
         product = self.db.query(Products).filter(Products.product_id == product_id).first()
 
         self.db.delete(product)
         self.db.commit()
-
-        return product

@@ -26,6 +26,7 @@ class ProductResponse(BaseModel):
     price: float
     stock_quantity: int
     category: str
+    image_file: str | None
     created_at: datetime
 
     model_config = ConfigDict(from_attributes=True)

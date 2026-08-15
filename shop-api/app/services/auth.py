@@ -1,14 +1,19 @@
-from datetime import datetime, UTC, timedelta
+from datetime import UTC, datetime, timedelta
 
 from app.core import security
 from app.core.config import settings
-from app.exceptions.user import InvalidCredentials, InvalidOrExpiredResetToken, UserNotFound, IncorrectPassword
+from app.exceptions.user import (
+    IncorrectPassword,
+    InvalidCredentials,
+    InvalidOrExpiredResetToken,
+    UserNotFound,
+)
 from app.models import PasswordResetTokens
 from app.models.user import Users
 from app.repository.password_reset_token import PasswordResetTokenRepository
+from app.repository.user import UserRepository
 from app.schemas.auth import Token
 from app.schemas.user import UserCreateRequest
-from app.repository.user import UserRepository
 from app.services.user import UserService
 
 
@@ -98,7 +103,7 @@ class AuthService:
             raise InvalidOrExpiredResetToken
 
         self.user_repository.update_user(
-            user_id=user.user_id,
+            user=user,
             update_data={"hashed_password": security.hash_password(new_password)}
         )
         self.reset_token_repository.delete_by_user_id(user.user_id)
@@ -122,7 +127,7 @@ class AuthService:
             raise IncorrectPassword
 
         self.user_repository.update_user(
-            user_id=user_id,
+            user=user,
             update_data={"hashed_password": security.hash_password(new_password)}
         )
         self.reset_token_repository.delete_by_user_id(user_id)

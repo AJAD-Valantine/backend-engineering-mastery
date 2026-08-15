@@ -1,13 +1,15 @@
-from email.message import EmailMessage
 import smtplib
+from email.message import EmailMessage
 
 from app.core.config import settings
+
 
 def send_password_reset_email(to_email: str, token: str) -> None:
     message = EmailMessage()
     message["From"] = settings.mail_from
     message["To"] = to_email
     message["Subject"] = "Reset your password"
+
     message.set_content(
         f"You requested a password reset.\n\n"
         f"Your reset token is: {token}\n\n"

@@ -1,7 +1,9 @@
-from fastapi import APIRouter, Query, Depends
+from fastapi import APIRouter, Query, Depends, UploadFile
 from starlette import status
 
+from app.core.config import settings
 from app.core.dependencies import require_admin, get_product_service
+from app.exceptions.image import FileTooLarge
 from app.schemas.product import (
     PaginatedProductResponse,
     ProductCreateRequest,
@@ -90,3 +92,34 @@ def delete_product(
     product_service : ProductService = Depends(get_product_service)
 ):
     return product_service.remove_product(product_id)
+
+
+# Admin Only
+@product_router.patch(
+    path="/{product_id}/picture",
+    response_model=ProductResponse,
+    status_code=status.HTTP_200_OK,
+    dependencies=[Depends(require_admin)]
+)
+def upload_product_picture(
+        product_id: int,
+        file: UploadFile,
+        product_service: ProductService = Depends(get_product_service),
+):
+    if file.size and file.size > settings.max_upload_size_bytes:
+        raise FileTooLarge()
+
+    content = file.file.read()
+    return product_service.upload_product_image(product_id, content)
+
+# Admin Only
+@product_router.delete(
+    path="/{product_id}/picture",
+    status_code=status.HTTP_204_NO_CONTENT,
+    dependencies=[Depends(require_admin)]
+)
+def delete_product_picture(
+        product_id: int,
+        product_service: ProductService = Depends(get_product_service),
+):
+    product_service.remove_product_image(product_id)

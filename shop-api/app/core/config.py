@@ -10,7 +10,6 @@ class Settings(BaseSettings):
     )
 
     # Database
-
     db_engine : str
     db_username : SecretStr
     db_password : SecretStr
@@ -23,13 +22,11 @@ class Settings(BaseSettings):
         return  f"{self.db_engine}://{self.db_username.get_secret_value()}:{self.db_password.get_secret_value()}@{self.db_host}:{self.db_port}/{self.db_name}"
 
     # Auth
-
     secret_key: SecretStr
     algorithm: str = "HS256"
     access_token_expire_minutes: int = 30
 
-    # Password Reset and BG Tasks
-
+    # Password Reset
     mail_server: str
     mail_port: int = 587
     mail_username: str
@@ -37,6 +34,12 @@ class Settings(BaseSettings):
     mail_from: str
     mail_use_tls: bool = True
     reset_token_expire_minutes: int = 60
+
+    # Image Upload
+    max_upload_size_bytes: int = 5 * 1024 * 1024
+    media_root: str = "media"
+    profile_pic_size: int = 300
+    product_pic_size: int = 800
 
 
 settings = Settings()  # type: ignore[call-arg]
