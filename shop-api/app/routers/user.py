@@ -1,25 +1,21 @@
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, Query, UploadFile
+from fastapi import APIRouter, Depends
 from starlette import status
 
-from app.core.config import settings
 from app.core.dependencies import (
     CurrentUser,
-    get_auth_service,
     get_user_service,
     require_admin,
 )
-from app.exceptions.image import FileTooLarge
-from app.schemas.auth import ChangePasswordRequest
 from app.schemas.user import (
     AdminCreateUserRequest,
-    PaginatedUserResponse,
     UserResponse,
     UserUpdateRequest,
 )
-from app.services.auth import AuthService
 from app.services.user import UserService
+
+from ..models.user import Users
 
 user_router = APIRouter(prefix="/users", tags=["Users"])
 
@@ -33,10 +29,9 @@ user_router = APIRouter(prefix="/users", tags=["Users"])
     dependencies=[Depends(require_admin)],
 )
 def create_user(
-    request : AdminCreateUserRequest,
-    user_service : UserService = Depends(get_user_service)
-
-):
+    request: AdminCreateUserRequest,
+    user_service: UserService = Depends(get_user_service),
+) -> Users:
 
     return user_service.add_user(request, request.role)
 
@@ -44,18 +39,15 @@ def create_user(
 # Admin Only
 @user_router.get(
     path="/get-all-users",
-    response_model=PaginatedUserResponse,
+    response_model=list[UserResponse],
     status_code=status.HTTP_200_OK,
     summary="Get all users",
     dependencies=[Depends(require_admin)],
 )
 def get_all_users(
-    page: int = Query(default=1, ge=1, description="Page number"),
-    size: int = Query(default=10, ge=1, le=100, description="Items per page"),
-    user_service : UserService = Depends(get_user_service)
-
-):
-    return user_service.get_all_users(page=page, size=size)
+    user_service: UserService = Depends(get_user_service),
+)   -> list[Users]:
+    return user_service.get_all_users()
 
 
 # Standard User Route
@@ -66,9 +58,8 @@ def get_all_users(
     summary="Get my profile",
 )
 def get_user(
-    current_user: CurrentUser,
-    user_service : UserService = Depends(get_user_service)
-): 
+    current_user: CurrentUser, user_service: UserService = Depends(get_user_service)
+) -> Users:
     return user_service.get_user_by_id(current_user.user_id)
 
 
@@ -82,22 +73,9 @@ def get_user(
 def update_user(
     request: UserUpdateRequest,
     current_user: CurrentUser,
-    user_service : UserService = Depends(get_user_service)
-):  
+    user_service: UserService = Depends(get_user_service),
+) -> Users:
     return user_service.update_user(current_user.user_id, request)
-
-# Standard User Route
-@user_router.patch(
-    path="/me/password",
-    status_code=status.HTTP_200_OK
-)
-def change_password(
-    request: ChangePasswordRequest,
-    current_user: CurrentUser,
-    auth_service: AuthService = Depends(get_auth_service),
-):
-    auth_service.change_password(current_user.user_id, request.current_password, request.new_password)
-    return {"message": "Password changed successfully"}
 
 
 # Admin Only
@@ -109,34 +87,7 @@ def change_password(
 )
 def delete_user(
     user_id: UUID,
-    user_service : UserService = Depends(get_user_service)
-):
+    user_service: UserService = Depends(get_user_service)
+    ) -> None:
+
     return user_service.remove_user(user_id)
-
-# Standard User Route
-@user_router.patch(
-    path="/me/picture",
-    response_model=UserResponse,
-    status_code=status.HTTP_200_OK
-)
-def upload_profile_picture(
-        current_user: CurrentUser,
-        file: UploadFile,
-        user_service: UserService = Depends(get_user_service),
-):
-    if file.size and file.size > settings.max_upload_size_bytes:
-        raise FileTooLarge()
-
-    content = file.file.read()
-    return user_service.upload_profile_image(current_user.user_id, content)
-
-# Standard User Route
-@user_router.delete(
-    path="/me/picture",
-    status_code=status.HTTP_204_NO_CONTENT
-)
-def delete_profile_picture(
-        current_user: CurrentUser,
-        user_service: UserService = Depends(get_user_service),
-):
-    user_service.remove_profile_image(current_user.user_id)

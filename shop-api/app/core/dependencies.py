@@ -1,4 +1,5 @@
-from typing import Annotated
+from collections.abc import Generator
+from typing import Annotated, Any
 from uuid import UUID
 
 from fastapi import Depends
@@ -10,7 +11,6 @@ from app.core.database import SessionLocal
 from app.exceptions.user import InvalidCredentials, PermissionDenied
 from app.models import Users
 from app.repository.cart_item import CartRepository
-from app.repository.password_reset_token import PasswordResetTokenRepository
 from app.repository.product import ProductRepository
 from app.repository.user import UserRepository
 from app.services.auth import AuthService
@@ -18,12 +18,11 @@ from app.services.cart_item import CartService
 from app.services.product import ProductService
 from app.services.user import UserService
 
-
 # --- DATABASE DEPENDENCY ---
 
-def get_db():
+def get_db() -> Generator[Session, Any, None]:
 
-    db = SessionLocal()
+    db: Session = SessionLocal()
     try:
         yield db
     finally:
@@ -36,14 +35,14 @@ DBSession = Annotated[Session, Depends(get_db)]
 
 def get_user_repository(
         db : DBSession
-):
+) -> UserRepository:
     return UserRepository(db)
 
 # --- USER SERVICE DEPENDENCY ---
 
 def get_user_service(
         user_repository : UserRepository = Depends(get_user_repository)
-):
+) -> UserService:
     return UserService(user_repository)
 
 
@@ -51,21 +50,21 @@ def get_user_service(
 
 def get_product_repository(
         db : DBSession
-):
+) -> ProductRepository:
     return ProductRepository(db)
 
 # --- PRODUCT SERVICE DEPENDENCY ---
 
 def get_product_service(
         product_repository : ProductRepository = Depends(get_product_repository)
-):
+) -> ProductService:
     return ProductService(product_repository)
 
 # --- CART REPOSITORY DEPENDENCY ---
 
 def get_cart_repository(
         db : DBSession
-):
+) -> CartRepository:
     return CartRepository(db)
 
 # --- CART SERVICE DEPENDENCY ---
@@ -75,7 +74,7 @@ def get_cart_service(
         user_service : UserService = Depends(get_user_service),
         product_service : ProductService = Depends(get_product_service),
 
-):
+) -> CartService:
     return CartService(
         cart_repository=cart_repository,
         user_service=user_service,
@@ -84,20 +83,15 @@ def get_cart_service(
 
 # --- AUTH REPOSITORY DEPENDENCY ---
 
-def get_password_reset_token_repository(db: DBSession):
-    return PasswordResetTokenRepository(db)
-
 # --- AUTH SERVICE DEPENDENCY ---
 
 def get_auth_service(
     user_repository: UserRepository = Depends(get_user_repository),
     user_service: UserService = Depends(get_user_service),
-    reset_token_repository: PasswordResetTokenRepository = Depends(get_password_reset_token_repository),
-):
+) -> AuthService:
     return AuthService(
         user_repository=user_repository,
         user_service=user_service,
-        reset_token_repository=reset_token_repository,
     )
 
 # --- AUTHENTICATION DEPENDENCY ---
@@ -106,21 +100,21 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 def get_current_user(
         token: str = Depends(oauth2_scheme),
         user_repository : UserRepository = Depends(get_user_repository)
-):
+) -> Users:
 
-    result = security.verify_access_token(token)
+    result: dict[str, str] | None = security.verify_access_token(token)
 
     if result is None:
         raise InvalidCredentials
 
-    str_user_id = result["user_id"]
+    str_user_id: str = result["user_id"]
 
     try:
         valid_uuid = UUID(str_user_id)
     except ValueError:
         raise InvalidCredentials
 
-    user = user_repository.read_user_by_id(valid_uuid)
+    user: Users | None = user_repository.read_user_by_id(valid_uuid)
 
     if user is None:
         raise InvalidCredentials

@@ -6,7 +6,7 @@ from pydantic import BaseModel, ConfigDict, EmailStr, Field
 
 
 class UserCreateRequest(BaseModel):
-    
+
     first_name: str = Field(..., min_length=2, max_length=50)
     last_name: str = Field(..., min_length=2, max_length=50)
     email: EmailStr = Field(...)
@@ -36,14 +36,6 @@ class UserResponse(BaseModel):
     role: str
     phone: str
     address: str
-    image_file: str | None
     created_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
-
-class PaginatedUserResponse(BaseModel):
-    
-    total_items: int
-    page: int
-    size: int
-    data: list[UserResponse]

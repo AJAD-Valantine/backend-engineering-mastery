@@ -4,10 +4,12 @@ from starlette import status
 from app.core.dependencies import CurrentUser, get_cart_service
 from app.schemas.cart_item import (
     CartItemCreateRequest,
-    CartItemUpdateRequest,
     CartItemResponse,
+    CartItemUpdateRequest,
 )
 from app.services.cart_item import CartService
+
+from ..models.cart_item import CartItems
 
 cart_item_router = APIRouter(tags=["Cart"])
 
@@ -52,7 +54,7 @@ def get_cart_item(
     item_id: int,
     current_user: CurrentUser,
     cart_service : CartService = Depends(get_cart_service)
-):
+) -> CartItems:
     return cart_service.view_cart_item_by_id(
         user_id=current_user.user_id,
         item_id=item_id,
@@ -70,7 +72,7 @@ def update_cart_item(
     request: CartItemUpdateRequest,
     current_user: CurrentUser,
     cart_service : CartService = Depends(get_cart_service)
-):
+) -> CartItems:
     return cart_service.update_quantity(
         user_id=current_user.user_id,
         item_id=item_id,
@@ -87,8 +89,8 @@ def remove_cart_item(
     item_id: int,
     current_user: CurrentUser,
     cart_service : CartService = Depends(get_cart_service)
-):
-    return cart_service.remove_cart_item(
+) -> None:
+    cart_service.remove_cart_item(
         user_id=current_user.user_id,
         item_id=item_id,
     )

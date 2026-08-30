@@ -1,6 +1,5 @@
 from uuid import UUID
 
-from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from app.models.user import Users
@@ -13,8 +12,8 @@ class UserRepository:
             db : Session
     ) -> None:
 
-        self.db = db
-    
+        self.db: Session = db
+
     def create_user(
             self,
             user: Users
@@ -26,16 +25,11 @@ class UserRepository:
 
         return user
 
-    def read_all_users(
-            self,
-            skip: int = 0,
-            limit: int = 10
-    )-> tuple[int, list[Users]]:
+    def read_all_users(self)-> list[Users]:
 
-        total_items = self.db.query(func.count(Users.user_id)).scalar()
-        users = self.db.query(Users).offset(skip).limit(limit).all()
-        
-        return total_items, users
+        users: list[Users] = self.db.query(Users).all()
+
+        return users
 
     def read_user_by_id(
             self,
@@ -70,7 +64,7 @@ class UserRepository:
             user_id : UUID
     ) -> None:
 
-        user = (self.db.query(Users).filter(Users.user_id == user_id).first())
+        user: Users | None = (self.db.query(Users).filter(Users.user_id == user_id).first())
 
         if user is not None:
             self.db.delete(user)

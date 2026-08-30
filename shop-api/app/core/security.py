@@ -1,13 +1,12 @@
-import hashlib
-import secrets
 from datetime import UTC, datetime, timedelta
+from typing import Any
 
 from jwt import InvalidTokenError, decode, encode
 from pwdlib import PasswordHash
 
 from app.core.config import settings
 
-password_hash = PasswordHash.recommended()
+password_hash: PasswordHash = PasswordHash.recommended()
 
 # Password Hashing and Verifying
 def hash_password(password: str) -> str:
@@ -17,13 +16,6 @@ def hash_password(password: str) -> str:
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     return password_hash.verify(plain_password, hashed_password)
 
-# Password Reset Token
-def generate_reset_token() -> str:
-    return secrets.token_urlsafe(32)
-
-
-def hash_reset_token(token: str) -> str:
-    return hashlib.sha256(token.encode()).hexdigest()
 
 # JWT
 def create_access_token(data: dict, expires_delta: timedelta | None = None) -> str:
@@ -34,11 +26,11 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None) -> s
         expire = datetime.now(UTC) + expires_delta
 
     else:
-        expire = datetime.now(UTC) + timedelta(minutes = settings.access_token_expire_minutes)
+        expire: datetime = datetime.now(UTC) + timedelta(minutes = settings.access_token_expire_minutes)
 
     to_encode.update({"exp" : expire})
 
-    encoded_jwt = encode(
+    encoded_jwt: str = encode(
         payload = to_encode,
         key = settings.secret_key.get_secret_value(),
         algorithm = settings.algorithm
@@ -50,7 +42,7 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None) -> s
 def verify_access_token(token : str) -> dict[str,str] | None:
 
     try:
-        decoded_jwt = decode(
+        decoded_jwt: dict[str, Any] = decode(
             jwt = token,
             key = settings.secret_key.get_secret_value(),
             algorithms = [settings.algorithm],

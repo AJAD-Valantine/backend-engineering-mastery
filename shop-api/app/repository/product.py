@@ -1,4 +1,3 @@
-from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from app.models.product import Products
@@ -11,7 +10,7 @@ class ProductRepository:
             db : Session
     ) -> None:
 
-        self.db = db
+        self.db: Session = db
 
     def create_product(
             self,
@@ -24,16 +23,11 @@ class ProductRepository:
 
         return product
 
-    def read_all_products(
-            self,
-            skip: int = 0,
-            limit: int = 10
-    ) -> tuple[int, list[Products]]:
+    def read_all_products(self) -> list[Products]:
 
-        total_items = self.db.query(func.count(Products.product_id)).scalar()
-        products = self.db.query(Products).offset(skip).limit(limit).all()
-        
-        return total_items, products
+        products: list[Products] = self.db.query(Products).all()
+
+        return products
 
     def read_product_by_id(
             self,
@@ -46,9 +40,9 @@ class ProductRepository:
             self,
             product_id: int,
             update_data: dict
-    ) -> Products:
+    ) -> Products | None:
 
-        product = self.db.query(Products).filter(Products.product_id == product_id).first()
+        product: Products | None = self.db.query(Products).filter(Products.product_id == product_id).first()
 
         if product is not None:
             for key, value in update_data.items():
@@ -62,9 +56,9 @@ class ProductRepository:
     def delete_product(
             self,
             product_id: int
-    ) -> Products:
+    ) -> Products | None:
 
-        product = self.db.query(Products).filter(Products.product_id == product_id).first()
+        product: Products | None = self.db.query(Products).filter(Products.product_id == product_id).first()
 
         self.db.delete(product)
         self.db.commit()
