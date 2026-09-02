@@ -2,13 +2,12 @@ from collections.abc import Generator
 from typing import Annotated, Any
 from uuid import UUID
 
-from fastapi import Depends
+from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 
 from app.core import security
 from app.core.database import SessionLocal
-from app.exceptions.user import InvalidCredentials, PermissionDenied
 from app.models import Users
 from app.repository.cart_item import CartRepository
 from app.repository.product import ProductRepository
@@ -104,20 +103,25 @@ def get_current_user(
 
     result: dict[str, str] | None = security.verify_access_token(token)
 
+    invalid_credentials = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
     if result is None:
-        raise InvalidCredentials
+        raise invalid_credentials
 
     str_user_id: str = result["user_id"]
 
     try:
         valid_uuid = UUID(str_user_id)
     except ValueError:
-        raise InvalidCredentials
+        raise invalid_credentials
 
     user: Users | None = user_repository.read_user_by_id(valid_uuid)
 
     if user is None:
-        raise InvalidCredentials
+        raise invalid_credentials
 
     return user
 
@@ -132,6 +136,9 @@ def require_admin(
         current_user : CurrentUser
 ):
     if current_user.role.lower() != "admin":
-        raise PermissionDenied
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You do not have permission to perform this action",
+        )
 
     return current_user

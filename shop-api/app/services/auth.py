@@ -1,5 +1,6 @@
+from fastapi import HTTPException, status
+
 from app.core import security
-from app.exceptions.user import InvalidCredentials
 from app.models.user import Users
 from app.repository.user import UserRepository
 from app.schemas.auth import Token
@@ -38,8 +39,11 @@ class AuthService:
                 plain_password,
                 user.hashed_password
         ):
-            raise InvalidCredentials
-
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Could not validate credentials",
+                headers={"WWW-Authenticate": "Bearer"}
+            )
         payload: dict[str, str] = {"sub": str(user.user_id)}
         token: str = security.create_access_token(payload)
 

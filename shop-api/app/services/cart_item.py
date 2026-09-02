@@ -1,10 +1,16 @@
 from uuid import UUID
-from app.exceptions.cart_item import CartItemNotFound, NotEnoughStockAvailable
+
+from fastapi import HTTPException, status
+
 from app.models.cart_item import CartItems
 from app.repository.cart_item import CartRepository
 from app.schemas.cart_item import CartItemCreateRequest, CartItemUpdateRequest
 from app.services.product import ProductService
 from app.services.user import UserService
+
+from ..models.cart import Carts
+from ..models.product import Products
+
 
 class CartService:
 
@@ -36,19 +42,26 @@ class CartService:
         product = self.product_service.get_product_by_id(request.product_id)
 
         if product.stock_quantity < request.quantity:
-            raise NotEnoughStockAvailable("Not enough stock available")
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Not enough stock available"
+                )
 
-        cart = self._get_or_create_cart(user_id)
+        cart: Carts = self._get_or_create_cart(user_id)
 
-        existing_item = self.cart_repository.get_item_in_cart_by_product(
+        existing_item: CartItems | None = self.cart_repository.get_item_in_cart_by_product(
             cart.cart_id,
             request.product_id
         )
 
         if existing_item:
-            new_quantity = existing_item.quantity + request.quantity
+            new_quantity: int = existing_item.quantity + request.quantity
+
             if product.stock_quantity < new_quantity:
-                raise NotEnoughStockAvailable("Not enough stock to add more of this item")
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Not enough stock to add more of this item",
+                )
 
             return self.cart_repository.update_item_quantity(
                 existing_item.cart_item_id,
@@ -60,13 +73,14 @@ class CartService:
             product_id=request.product_id,
             quantity=request.quantity,
         )
+        
         return self.cart_repository.add_item_to_cart(new_item)
 
     def view_cart(
             self,
             user_id: UUID
     ):
-        cart = self.cart_repository.get_cart_by_user_id(user_id)
+        cart: Carts | None = self.cart_repository.get_cart_by_user_id(user_id)
         if not cart:
             return []
         return self.cart_repository.get_cart_items(cart.cart_id)
@@ -75,14 +89,21 @@ class CartService:
             self,
             user_id: UUID,
             item_id: int
-    ):
-        cart = self.cart_repository.get_cart_by_user_id(user_id)
-        if not cart:
-            raise CartItemNotFound("Cart not found")
+    ) -> CartItems:
+        cart: Carts | None = self.cart_repository.get_cart_by_user_id(user_id)
 
-        item = self.cart_repository.get_cart_item_by_id(item_id)
+        if not cart:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Cart not found"
+            )
+        item: CartItems | None = self.cart_repository.get_cart_item_by_id(item_id)
+
         if not item or item.cart_id != cart.cart_id:
-            raise CartItemNotFound("Cart item not found")
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Cart item not found"
+                )
 
         return item
 
@@ -91,15 +112,18 @@ class CartService:
             user_id: UUID,
             item_id: int,
             request: CartItemUpdateRequest
-    ):
-        item = self.view_cart_item_by_id(
+    ) -> CartItems:
+        item: CartItems = self.view_cart_item_by_id(
             user_id,
             item_id
         )
-        product = self.product_service.get_product_by_id(item.product_id)
+        product: Products = self.product_service.get_product_by_id(item.product_id)
 
         if product.stock_quantity < request.quantity:
-            raise NotEnoughStockAvailable("Not enough stock available for this quantity")
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Not enough stock available for this quantity",
+            )
 
         return self.cart_repository.update_item_quantity(
             item_id,
@@ -110,8 +134,8 @@ class CartService:
             self,
             user_id: UUID,
             item_id: int
-    ):
-        item = self.view_cart_item_by_id(
+    ) -> CartItems:
+        item: CartItems = self.view_cart_item_by_id(
             user_id,
             item_id
         )

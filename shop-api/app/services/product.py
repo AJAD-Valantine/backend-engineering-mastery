@@ -1,6 +1,7 @@
 from typing import Any
 
-from app.exceptions.product import ProductNotFound
+from fastapi import HTTPException, status
+
 from app.models.product import Products
 from app.repository.product import ProductRepository
 from app.schemas.product import (
@@ -41,7 +42,10 @@ class ProductService:
         product: Products | None = self.product_repository.read_product_by_id(product_id)
 
         if product is None:
-            raise ProductNotFound("product not found")
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Product not found"
+            )
 
         return product
 
@@ -54,14 +58,17 @@ class ProductService:
         product_result: Products | None = self.product_repository.read_product_by_id(product_id)
 
         if product_result is None:
-            raise ProductNotFound("product not found")
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Product not found"
+            )
 
         update_data: dict[str, Any] = request.model_dump(exclude_unset=True)
 
         return self.product_repository.update_product(
             product_id=product_id,
             update_data=update_data
-        )
+        ) # type: ignore
 
     def remove_product(
             self,
@@ -70,6 +77,9 @@ class ProductService:
         product_result: Products | None = self.product_repository.read_product_by_id(product_id)
 
         if product_result is None:
-            raise ProductNotFound("product not found")
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Product not found"
+            )
 
-        return self.product_repository.delete_product(product_id)
+        return self.product_repository.delete_product(product_id) # type: ignore

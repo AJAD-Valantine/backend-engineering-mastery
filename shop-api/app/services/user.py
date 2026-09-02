@@ -2,8 +2,9 @@ import uuid
 from typing import Any
 from uuid import UUID
 
+from fastapi import HTTPException, status
+
 from app.core.security import hash_password
-from app.exceptions.user import EmailAlreadyExits, UserNotFound
 from app.models.user import Users
 from app.repository.user import UserRepository
 from app.schemas.user import (
@@ -27,7 +28,10 @@ class UserService:
     ) -> Users:
 
         if self.user_repository.read_user_by_email(user.email) is not None:
-            raise EmailAlreadyExits()
+             raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Email already exists"
+            )
 
         user_id: UUID = uuid.uuid4()
         hashed_password: str = hash_password(user.password)
@@ -57,7 +61,10 @@ class UserService:
         user: Users | None = self.user_repository.read_user_by_id(user_id)
 
         if user is None:
-            raise UserNotFound("user not found")
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="User not found"
+            )
 
         return user
 
@@ -70,7 +77,10 @@ class UserService:
         user: Users | None = self.user_repository.read_user_by_id(user_id)
 
         if user is None:
-            raise UserNotFound("user not found")
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="User not found"
+            )
 
         update_data: dict[str, Any] = request.model_dump(exclude_unset=True)
 
@@ -87,6 +97,8 @@ class UserService:
         user: Users | None = self.user_repository.read_user_by_id(user_id)
 
         if user is None:
-            raise UserNotFound("user not found")
-
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="User not found"
+            )
         self.user_repository.delete_user(user_id)
