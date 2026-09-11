@@ -1,29 +1,36 @@
-from sqlalchemy import Boolean, ForeignKey
+from enum import Enum
+
+from sqlalchemy import Enum as SAEnum
+from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.database import Base
 
 
+class CopyStatus(str, Enum):
+    ACTIVE = "active"
+    DAMAGED = "damaged"
+    RETIRED = "retired"
+    LOST = "lost"
+
+
 class BookCopy(Base):
     __tablename__ = "book_copies"
 
-    book_copy_id: Mapped[int] = mapped_column(
-        primary_key=True
+    # -- COLUMNS -- #
+
+    book_copy_id: Mapped[int] = mapped_column(primary_key=True)
+
+    book_id: Mapped[int] = mapped_column(ForeignKey("books.book_id"), nullable=False)
+
+    status: Mapped[CopyStatus] = mapped_column(
+        SAEnum(CopyStatus, name="copy_status"),
+        nullable=False,
+        server_default=CopyStatus.ACTIVE,
     )
 
-    book_id: Mapped[int] = mapped_column(
-        ForeignKey("books.book_id")
-        )
+    # -- RELATIONSHIPS -- #
 
-    is_available: Mapped[bool] = mapped_column(
-        Boolean,
-        default=True
-        )
+    book: Mapped["Book"] = relationship(back_populates="copies")  # type: ignore # noqa: F821
 
-    book: Mapped["Book"] = relationship(  # type: ignore  # noqa: F821
-        back_populates="copies"
-    )
-
-    loan: Mapped[list["Loan"]] = relationship(  # type: ignore  # noqa: F821
-        back_populates="book_copy"
-    )
+    loans: Mapped[list["Loan"]] = relationship(back_populates="book_copy")  # type: ignore # noqa: F821
