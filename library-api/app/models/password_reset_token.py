@@ -1,0 +1,50 @@
+import uuid
+from datetime import datetime
+
+from sqlalchemy import UUID, CheckConstraint, DateTime, ForeignKey, String
+from sqlalchemy.orm import (
+    Mapped,
+    mapped_column,
+    relationship,
+)
+
+from app.core.database import Base
+
+
+class PasswordResetToken(Base):
+    __tablename__ = "password_reset_tokens"
+
+    # -- COLUMNS -- #
+
+    password_reset_token_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), primary_key=True
+    )
+
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("users.user_id", ondelete="RESTRICT"), index=True, nullable=False
+    )
+
+    token_hash: Mapped[str] = mapped_column(
+        String(64),
+        nullable=False,
+        unique=True,
+    )
+
+    expires_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+
+    used_at: Mapped[datetime] = mapped_column(
+        DateTime, nullable=True, server_default=None
+    )
+
+    # -- RELATIONSHIPS -- #
+
+    user: Mapped["User"] = relationship(back_populates="password_reset_tokens")  # pyright: ignore[reportUndefinedVariable]  # noqa: F821
+
+    # -- TABLE ARGS -- #
+
+    __table_args__ = (
+        CheckConstraint(
+            "used_at <= expires_at",
+            name="used_at_lte_expires_at",
+        ),
+    )
