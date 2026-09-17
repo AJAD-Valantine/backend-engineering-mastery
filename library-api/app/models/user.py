@@ -60,6 +60,12 @@ class User(Base):
         nullable=False,
     )
 
+    is_verified: Mapped[bool] = mapped_column(
+        default=False,
+        nullable=False,
+        index=True
+    )
+
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         onupdate=func.now(),
@@ -74,6 +80,14 @@ class User(Base):
     )
 
     refresh_tokens: Mapped[list["RefreshToken"]] = relationship(  # type: ignore  # noqa: F821
+        back_populates="user", cascade="all, delete-orphan"
+    )
+
+    password_reset_tokens: Mapped["PasswordResetToken"] = relationship(  # type: ignore  # noqa: F821
+        back_populates="user", cascade="all, delete-orphan"
+    )
+
+    email_verification_tokens: Mapped["EmailVerificationToken"] = relationship(  # type: ignore  # noqa: F821
         back_populates="user", cascade="all, delete-orphan"
     )
 
