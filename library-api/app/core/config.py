@@ -34,11 +34,18 @@ class Settings(BaseSettings):
             database=self.db_name,
         )
 
-    # Authentication
+    # Security
     jwt_secret_key: SecretStr
     jwt_algorithm: str = "HS256"
     access_token_expire_minutes: int = 30
+    refresh_token_expire_days: int = 30
+    password_reset_expire_minutes: int = 15
+    email_verification_token_expire_days: int = 1
+    frontend_url: str = "http://localhost:3000"
 
+    # Email
+    smtp_port: int
+    smtp_host: str
 
 @lru_cache
 def get_settings() -> Settings:
