@@ -29,4 +29,15 @@ def register_user(
     return auth_service.register_user(request)
 
 
+@auth_router.post(
+    path="/login",
+    status_code=status.HTTP_200_OK,
+    summary="User log in — returns access + refresh token",
+)
+def login_user(
+    form_data: OAuth2Form,
+    auth_service: AuthService = Depends(get_auth_service),
+) -> TokenResponse:
+
+    return auth_service.authenticate_user(form_data.username, form_data.password)
 
