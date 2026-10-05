@@ -41,3 +41,46 @@ def login_user(
 
     return auth_service.authenticate_user(form_data.username, form_data.password)
 
+
+@auth_router.post(
+    path="/refresh",
+    status_code=status.HTTP_200_OK,
+    summary="Rotate refresh token — returns new access + refresh token",
+)
+def refresh_tokens(
+    body: RefreshTokenRequest,
+    auth_service: AuthService = Depends(get_auth_service),
+) -> TokenResponse:
+
+    return auth_service.refresh_tokens(body.refresh_token)
+
+
+# OPTION A — keep this one if you want single-device logout
+@auth_router.post(
+    path="/logout",
+    status_code=status.HTTP_204_NO_CONTENT,
+    summary="Log out this device",
+)
+def logout(
+    body: RefreshTokenRequest,
+    auth_service: AuthService = Depends(get_auth_service),
+) -> None:
+
+    auth_service.logout(body.refresh_token)
+
+
+# OPTION B — keep this one (or replace the above) for all-device logout
+@auth_router.post(
+    path="/logout/all",
+    status_code=status.HTTP_204_NO_CONTENT,
+    summary="Log out all devices",
+)
+def logout_all(
+    body: RefreshTokenRequest,
+    auth_service: AuthService = Depends(get_auth_service),
+) -> None:
+
+    auth_service.logout_all(body.refresh_token)
+
+
+
