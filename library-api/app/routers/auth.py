@@ -101,3 +101,14 @@ def reset_password(
     auth_service.reset_password(request.token, request.new_password)
 
 
+@auth_router.get(
+    path="/verify-email",
+    status_code=status.HTTP_200_OK,
+    summary="Verify user email via token link",
+)
+def verify_email(
+    token: str,
+    auth_service: AuthService = Depends(get_auth_service),
+) -> None:
+
+    auth_service.verify_email(token)
