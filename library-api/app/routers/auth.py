@@ -92,4 +92,12 @@ def forgot_password(
     auth_service.forgot_password(request.email)
 
 
+@auth_router.post("/reset-password", status_code=204)
+def reset_password(
+    request: ResetPasswordRequest,
+    auth_service: AuthService = Depends(get_auth_service),
+) -> None:
+
+    auth_service.reset_password(request.token, request.new_password)
+
 
