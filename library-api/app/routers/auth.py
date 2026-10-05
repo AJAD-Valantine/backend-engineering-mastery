@@ -83,4 +83,13 @@ def logout_all(
     auth_service.logout_all(body.refresh_token)
 
 
+@auth_router.post("/forgot-password", status_code=204)
+def forgot_password(
+    request: ForgotPasswordRequest,
+    auth_service: AuthService = Depends(get_auth_service),
+) -> None:
+
+    auth_service.forgot_password(request.email)
+
+
 
