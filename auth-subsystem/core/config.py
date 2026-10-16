@@ -24,3 +24,14 @@ class Settings(BaseSettings):
     # Email
     smtp_port: int
     smtp_host: str
+
+    # OAuth 2.0 Credentials
+    google_client_id: str = ""
+    google_client_secret: SecretStr = SecretStr("")
+    # Usually something like: http://localhost:8000/auth/google/callback
+    google_redirect_uri: str = ""
+
+    github_client_id: str = ""
+    github_client_secret: SecretStr = SecretStr("")
+    # Usually something like: http://localhost:8000/auth/github/callback
+    github_redirect_uri: str = ""
