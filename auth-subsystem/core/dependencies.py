@@ -1,12 +1,17 @@
-from collections.abc import Generator
+from collections.abc import AsyncGenerator, Callable, Generator
 from functools import lru_cache
 from typing import Annotated, Any
+from uuid import UUID
 
+import httpx
 from core.config import Settings
 from core.database import SessionLocal
 from core.email import EmailManager
+from core.enums import UserRole
 from core.security import SecurityManager
-from fastapi import Depends
+from fastapi import Depends, HTTPException, Request, status
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from models.user import User
 from repositories.email_verification_token import (
     EmailVerificationTokenRepository,
 )
@@ -32,6 +37,7 @@ def get_security_manager(settings: SettingsDep) -> SecurityManager:
 
 SecurityManagerDep = Annotated[SecurityManager, Depends(get_security_manager)]
 
+
 def get_email_manager(settings: SettingsDep) -> EmailManager:
     return EmailManager(settings)
 
@@ -52,6 +58,14 @@ def get_db() -> Generator[Session, Any, None]:
 
 
 SessionDep = Annotated[Session, Depends(get_db)]
+
+
+async def get_http_client() -> AsyncGenerator[httpx.AsyncClient, None]:
+    async with httpx.AsyncClient() as client:
+        yield client
+
+
+HttpClientDep = Annotated[httpx.AsyncClient, Depends(get_http_client)]
 
 
 def get_user_repository(db: SessionDep) -> UserRepository:
@@ -126,7 +140,12 @@ def get_auth_service(
     settings: SettingsDep,
     security_manager: SecurityManagerDep,
     email_manager: EmailManagerDep,
+    request: Request,
 ) -> AuthService:
+
+    client_ip: str = request.client.host if request.client else "unknown"
+    user_agent: str = request.headers.get("user-agent", "unknown")
+
     return AuthService(
         user_service=user_service,
         user_repository=user_repository,
@@ -136,7 +155,63 @@ def get_auth_service(
         settings=settings,
         security_manager=security_manager,
         email_manager=email_manager,
+        client_ip=client_ip,
+        user_agent=user_agent,
     )
 
 
 AuthServiceDep = Annotated[AuthService, Depends(get_auth_service)]
+
+
+AccessTokenDep = Annotated[HTTPAuthorizationCredentials, Depends(HTTPBearer())]
+
+
+def get_current_user(
+    auth_header: AccessTokenDep,
+    user_repository: UserRepositoryDep,
+    security_manager: SecurityManagerDep,
+) -> User:
+
+    token: str = auth_header.credentials
+
+    str_user_id: str = security_manager.verify_access_token(token)
+
+    try:
+        uuid_user_id = UUID(str_user_id)
+    except ValueError:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Authentication failed",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    user: User | None = user_repository.read_by_id(uuid_user_id)
+
+    if user is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Authentication failed",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    return user
+
+
+CurrentUserDep = Annotated[User, Depends(get_current_user)]
+
+
+def require_roles(*allowed_roles: UserRole) -> Callable[..., User]:
+    def role_checker(
+        current_user: CurrentUserDep,
+    ) -> User:
+        if current_user.role not in allowed_roles:
+            raise HTTPException(
+                status_code=403,
+                detail="You do not have permission to perform this action",
+            )
+        return current_user
+
+    return role_checker
+
+
+RequireRoleDep = Annotated[User, Depends(require_roles)]
