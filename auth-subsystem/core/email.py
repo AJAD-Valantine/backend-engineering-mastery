@@ -28,11 +28,11 @@ class EmailManager:
             )
 
     def send_reset_email(self, to_email: str, raw_token: str) -> None:
-        reset_url = f"{self.settings.frontend_url}/reset-password?token={raw_token}"
-        content = f"Click to reset your password: {reset_url}"
+        reset_url: str = f"{self.settings.frontend_url}/reset-password?token={raw_token}"
+        content: str = f"Click to reset your password: {reset_url}"
         self._send(to_email=to_email, subject="Password Reset", content=content)
 
     def send_verification_email(self, to_email: str, raw_token: str) -> None:
-        verify_url = f"{self.settings.frontend_url}/verify-email?token={raw_token}"
-        content = f"Click to verify your email: {verify_url}"
+        verify_url: str = f"{self.settings.frontend_url}/verify-email?token={raw_token}"
+        content: str = f"Click to verify your email: {verify_url}"
         self._send(to_email=to_email, subject="Email Verification", content=content)
