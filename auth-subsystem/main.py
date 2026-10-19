@@ -1,15 +1,14 @@
-import secrets
-import urllib.parse
 from collections.abc import Sequence
+from typing import Any
 from uuid import UUID
 
 from core.database import Base, engine
-from core.dependencies import AuthServiceDep, CurrentUserDep, HttpClientDep, SettingsDep
-from fastapi import FastAPI, HTTPException, Request, status
+from core.dependencies import AuthServiceDep, CurrentUserDep, HttpClientDep
+from fastapi import Cookie, FastAPI, Response, status
 from fastapi.responses import RedirectResponse
-from models.email_verification_token import EmailVerificationToken
-from models.oauth_account import OAuthAccount
-from models.password_reset_token import PasswordResetToken
+from models.email_verification_token import EmailVerificationToken  # noqa: F401
+from models.oauth_account import OAuthAccount  # noqa: F401
+from models.password_reset_token import PasswordResetToken  # noqa: F401
 from models.refresh_token import RefreshToken
 from models.user import User
 from schemas.auth import (
@@ -215,64 +214,30 @@ def logout_all_sessions(
     status_code=status.HTTP_200_OK,
     summary="List available OAuth providers",
 )
-def get_providers():
+def get_providers() -> dict[str, list[str]]:
     return {"providers": ["google", "github"]}
 
 
-@app.get(path="/auth/google", summary="Initiate Google OAuth2 flow")
-def login_via_google(settings: SettingsDep):
-    # 1. Generate a random state token for CSRF protection
-    state = secrets.token_urlsafe(32)
+@app.get(
+    path="/auth/google",
+    summary="Initiate Google OAuth2 flow",
+    response_class=RedirectResponse,
+)
+def login_via_google(
+    auth_service: AuthServiceDep,
+) -> RedirectResponse:
 
-    # 2. Build the authorization URL
-    params = {
-        "client_id": settings.google_client_id,
-        "redirect_uri": settings.google_redirect_uri,
-        "response_type": "code",
-        "scope": "openid email profile",  # OIDC scopes
-        "state": state,
-        "access_type": "offline",
-        "prompt": "consent",
-    }
-    auth_url = (
-        f"https://accounts.google.com/o/oauth2/v2/auth?{urllib.parse.urlencode(params)}"
+    state: str = auth_service.generate_state()
+
+    auth_url: str = auth_service.url_for_google(state)
+
+    response = RedirectResponse(
+        url=auth_url,
+        status_code=302,
     )
 
-    # 3. Redirect the user and set the state cookie
-    response = RedirectResponse(url=auth_url)
-    response.set_cookie(
-        key="oauth_state",
-        value=state,
-        httponly=True,
-        max_age=600,  # Expires in 10 minutes
-        samesite="lax",
-    )
-    return response
+    auth_service.set_state_cookie(response, state)
 
-
-@app.get(path="/auth/github", summary="Initiate GitHub OAuth2 flow")
-def login_via_github(settings: SettingsDep):
-    state = secrets.token_urlsafe(32)
-
-    params = {
-        "client_id": settings.github_client_id,
-        "redirect_uri": settings.github_redirect_uri,
-        "response_type": "code",
-        "scope": "user:email",  # GitHub's scope for reading emails
-        "state": state,
-    }
-    auth_url = (
-        f"https://github.com/login/oauth/authorize?{urllib.parse.urlencode(params)}"
-    )
-
-    response = RedirectResponse(url=auth_url)
-    response.set_cookie(
-        key="oauth_state",
-        value=state,
-        httponly=True,
-        max_age=600,
-        samesite="lax",
-    )
     return response
 
 
@@ -282,128 +247,31 @@ def login_via_github(settings: SettingsDep):
     summary="Handle Google OAuth2 callback",
 )
 async def google_callback(
-    request: Request,
     code: str,
     state: str,
-    settings: SettingsDep,
+    response: Response,
     http_client: HttpClientDep,
     auth_service: AuthServiceDep,
+    oauth_state: str | None = Cookie(default=None),
 ) -> TokenResponse:
-    # 1. Verify the state parameter against the cookie (CSRF Protection)
-    cookie_state = request.cookies.get("oauth_state")
-    if not cookie_state or state != cookie_state:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Invalid state token. Possible CSRF attack.",
-        )
 
-    # 2. Exchange the authorization code for a Google Access Token
-    token_url = "https://oauth2.googleapis.com/token"
-    token_data = {
-        "client_id": settings.google_client_id,
-        "client_secret": settings.google_client_secret.get_secret_value(),
-        "code": code,
-        "grant_type": "authorization_code",
-        "redirect_uri": settings.google_redirect_uri,
-    }
-
-    response = await http_client.post(token_url, data=token_data)
-
-    if response.status_code != 200:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Failed to exchange authorization code with Google.",
-        )
-
-    google_tokens = response.json()
-    google_access_token = google_tokens.get("access_token")
-
-    # 3. Fetch Google User Profile
-    user_info_response = await http_client.get(
-        "https://www.googleapis.com/oauth2/v2/userinfo",
-        headers={"Authorization": f"Bearer {google_access_token}"},
+    auth_service.verify_state(
+        returned_state=state,
+        state_cookie=oauth_state,
+        response=response,
     )
-    user_info = user_info_response.json()
 
-    # 4. Pass the data to your service layer
+    google_tokens: dict[str, Any] = await auth_service.exchange_code_for_tokens(
+        code, http_client
+    )
+    user_info: dict[str, Any] = await auth_service.fetch_user_info(
+        google_tokens["access_token"], http_client
+    )
+
     return auth_service.authenticate_oauth_user(
         provider="google",
         account_id=user_info["id"],
         email=user_info["email"],
         first_name=user_info.get("given_name", "Unknown"),
         last_name=user_info.get("family_name", "Unknown"),
-    )
-
-
-@app.get(
-    path="/auth/github/callback",
-    response_model=TokenResponse,
-    summary="Handle GitHub OAuth2 callback",
-)
-async def github_callback(
-    request: Request,
-    code: str,
-    state: str,
-    settings: SettingsDep,
-    http_client: HttpClientDep,
-    auth_service: AuthServiceDep,
-) -> TokenResponse:
-    # 1. Verify the state parameter
-    cookie_state = request.cookies.get("oauth_state")
-    if not cookie_state or state != cookie_state:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Invalid state token. Possible CSRF attack.",
-        )
-
-    # 2. Exchange the code for a GitHub Access Token
-    token_url = "https://github.com/login/oauth/access_token"
-    token_data = {
-        "client_id": settings.github_client_id,
-        "client_secret": settings.github_client_secret.get_secret_value(),
-        "code": code,
-        "redirect_uri": settings.github_redirect_uri,
-    }
-
-    headers = {"Accept": "application/json"}
-    response = await http_client.post(token_url, data=token_data, headers=headers)
-
-    if response.status_code != 200:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Failed to exchange authorization code with GitHub.",
-        )
-
-    github_tokens = response.json()
-    github_access_token = github_tokens.get("access_token")
-
-    # 3. Fetch GitHub User Profile
-    user_headers = {
-        "Authorization": f"Bearer {github_access_token}",
-        "Accept": "application/json",
-    }
-    user_info_response = await http_client.get(
-        "https://api.github.com/user", headers=user_headers
-    )
-    user_info = user_info_response.json()
-
-    email = user_info.get("email")
-    if not email:
-        emails_response = await http_client.get(
-            "https://api.github.com/user/emails", headers=user_headers
-        )
-        emails = emails_response.json()
-        email = next((e["email"] for e in emails if e["primary"]), emails[0]["email"])
-
-    name_parts = (user_info.get("name") or user_info["login"]).split(" ", 1)
-    first_name = name_parts[0]
-    last_name = name_parts[1] if len(name_parts) > 1 else ""
-
-    # 4. Pass the data to your service layer
-    return auth_service.authenticate_oauth_user(
-        provider="github",
-        account_id=str(user_info["id"]),
-        email=email,
-        first_name=first_name,
-        last_name=last_name,
     )
