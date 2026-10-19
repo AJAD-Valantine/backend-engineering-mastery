@@ -1,23 +1,16 @@
 import uuid
 from datetime import datetime
-from enum import Enum
 
 from core.database import Base
+from core.enums import UserRole
 from sqlalchemy import (
     UUID,
     DateTime,
+    Enum,
     String,
     func,
 )
-from sqlalchemy import Enum as SAEnum
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-
-
-class UserRole(str, Enum):
-    MOD = "moderator"
-    MEMBER = "member"
-    LIBRARIAN = "super_admin"
-    ADMIN = "admin"
 
 
 class User(Base):
@@ -36,7 +29,7 @@ class User(Base):
     hashed_password: Mapped[str | None] = mapped_column(String(255), nullable=True)
 
     role: Mapped[UserRole] = mapped_column(
-        SAEnum(UserRole, name="user_role"),  # pyright: ignore[reportCallIssue] # type: ignore
+        Enum(UserRole, name="user_role"),
         nullable=False,
         default=UserRole.MEMBER,
     )
