@@ -1,11 +1,16 @@
+import secrets
 from collections.abc import Sequence
 from datetime import UTC, datetime, timedelta
+from typing import Any
+from urllib.parse import urlencode
 from uuid import UUID
 
 from core.config import Settings
 from core.email import EmailManager
 from core.security import SecurityManager
-from fastapi import HTTPException, status
+from fastapi import HTTPException, Response, status
+from httpx import AsyncClient
+from itsdangerous import BadSignature, SignatureExpired, URLSafeTimedSerializer
 from models.email_verification_token import EmailVerificationToken
 from models.oauth_account import OAuthAccount
 from models.password_reset_token import PasswordResetToken
@@ -153,7 +158,6 @@ class AuthService:
             access_token=new_access_token, refresh_token=new_refresh_token
         )
 
-    # OPTION A — logs out this device only
     def logout(self, raw_token: str) -> None:
 
         token_hash: str = self.security_manager.hash_token(raw_token)
@@ -170,7 +174,6 @@ class AuthService:
 
         self.refresh_token_repository.revoke(stored)
 
-    # OPTION B — logs out every device for this user
     def logout_all(self, raw_token: str) -> None:
 
         hashed_refresh_token: str = self.security_manager.hash_token(raw_token)
@@ -339,6 +342,51 @@ class AuthService:
     def logout_all_sessions(self, user: User) -> None:
         self.refresh_token_repository.revoke_all_for_user(user.user_id)
 
+    def generate_state(self) -> str:
+        return self.security_manager.generate_token()
+
+
+    def set_state_cookie(self, response: Response, state: str) -> None:
+        state_serializer = URLSafeTimedSerializer(
+            self.settings.state_secret_key.get_secret_value()
+        )
+
+        signed_state = state_serializer.dumps(state)
+
+        response.set_cookie(
+            key=self.settings.state_cookie_name,
+            value=signed_state,
+            httponly=True,
+            secure=True,
+            samesite="lax",
+            max_age=self.settings.state_max_age,
+        )
+
+
+    def verify_state(
+        self,
+        returned_state: str,
+        state_cookie: str | None,
+        response: Response,
+    ) -> None:
+
+        state_serializer = URLSafeTimedSerializer(self.settings.state_secret_key.get_secret_value())
+
+        if state_cookie is None:
+            raise HTTPException(status_code=400, detail="Missing state cookie")
+
+        try:
+            original_state = state_serializer.loads(state_cookie, max_age=self.settings.state_max_age)
+        except SignatureExpired:
+            raise HTTPException(status_code=400, detail="State expired — restart login")
+        except BadSignature:
+            raise HTTPException(status_code=400, detail="Invalid state")
+
+        if not secrets.compare_digest(original_state, returned_state):
+            raise HTTPException(status_code=400, detail="State mismatch")
+
+        response.delete_cookie(self.settings.state_cookie_name)
+
     def authenticate_oauth_user(
         self,
         provider: str,
@@ -348,7 +396,6 @@ class AuthService:
         last_name: str,
     ) -> TokenResponse:
 
-        # 1. Find or create the local user
         user: User | None = self.user_repository.read_by_email(email)
 
         if user is None:
@@ -356,14 +403,14 @@ class AuthService:
                 first_name=first_name,
                 last_name=last_name,
                 email=email,
-                hashed_password=None,  # No password for OAuth users
-                is_verified=True,  # Trust Google/GitHub verification
+                hashed_password=None,
+                is_verified=True,
                 role="member",
             )
             user = self.user_repository.create(user)
 
         # 2. Link the OAuth account if it isn't already
-        is_linked = any(
+        is_linked: bool = any(
             acc.oauth_name == provider and acc.account_id == account_id
             for acc in user.oauth_accounts
         )
@@ -376,9 +423,7 @@ class AuthService:
                 user_id=user.user_id,
             )
             self.user_repository.db.add(new_oauth)
-            self.user_repository.db.flush()
 
-        # 3. Generate standard JWTs and store the RefreshToken (Session)
         access_token: str = self.security_manager.create_access_token(user.user_id)
         refresh_token: str = self.security_manager.generate_token()
         hashed_refresh_token: str = self.security_manager.hash_token(refresh_token)
@@ -396,3 +441,59 @@ class AuthService:
         self.refresh_token_repository.create(token)
 
         return TokenResponse(access_token=access_token, refresh_token=refresh_token)
+
+    def url_for_google(self, state: str) -> str:
+
+        params: dict[str, str] = {
+            "client_id": self.settings.google_client_id,
+            "redirect_uri": self.settings.google_redirect_uri,
+            "response_type": "code",
+            "scope": "openid email profile",
+            "state": state,
+            "access_type": "offline",
+            "prompt": "consent",
+        }
+
+        auth_url = self.settings.google_auth_url / urlencode(params)
+        return str(auth_url)
+
+
+    async def exchange_code_for_tokens(
+        self, code: str, client: AsyncClient
+    ) -> dict[str, Any]:
+
+        response = await client.post(
+            url=self.settings.google_token_url,
+            data={
+                "grant_type": "authorization_code",
+                "code": code,
+                "redirect_uri": self.settings.google_redirect_uri,
+                "client_id": self.settings.google_client_id,
+                "client_secret": self.settings.google_client_secret,
+            },
+        )
+
+        if response.status_code != 200:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Failed to exchange authorization code",
+            )
+
+        return response.json()
+
+    async def fetch_user_info(
+        self, access_token: str, client: AsyncClient
+    ) -> dict[str, Any]:
+
+        response = await client.get(
+                url=self.settings.google_user_info_url,
+                headers={"Authorization": f"Bearer {access_token}"},
+            )
+
+        if response.status_code != 200:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Failed to fetch user info",
+            )
+
+        return response.json()
