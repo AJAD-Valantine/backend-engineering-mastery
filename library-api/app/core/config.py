@@ -1,5 +1,4 @@
 from functools import lru_cache
-from typing import Literal
 
 from pydantic import SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -16,12 +15,12 @@ class Settings(BaseSettings):
     )
 
     # Database
-    db_engine: Literal["postgresql+psycopg"] = "postgresql+psycopg"
-    db_username: str
+    db_engine: str = "postgresql+psycopg"
+    db_username: str = "postgres"
     db_password: SecretStr
-    db_host: str
+    db_host: str = "localhost"
     db_port: int = 5432
-    db_name: str
+    db_name: str = "library_db"
 
     @property
     def database_url(self) -> URL:
@@ -44,9 +43,11 @@ class Settings(BaseSettings):
     frontend_url: str = "http://localhost:3000"
 
     # Email
-    smtp_port: int
-    smtp_host: str
+    smtp_port: int = 1025
+    smtp_host: str = "localhost"
+
 
 @lru_cache
 def get_settings() -> Settings:
-    return Settings() # pyright: ignore[reportCallIssue]
+    return Settings()  # pyright: ignore[reportCallIssue]
+
