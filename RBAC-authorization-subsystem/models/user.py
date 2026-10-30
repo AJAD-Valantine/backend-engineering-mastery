@@ -10,7 +10,7 @@ from sqlalchemy import (
     String,
     func,
 )
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.orm import Mapped, mapped_column
 
 
 class User(Base):
@@ -31,7 +31,7 @@ class User(Base):
     role: Mapped[UserRole] = mapped_column(
         Enum(UserRole, name="user_role"),
         nullable=False,
-        default=UserRole.MEMBER,
+        default=UserRole.USER,
     )
 
     registered_at: Mapped[datetime] = mapped_column(
@@ -48,8 +48,4 @@ class User(Base):
         onupdate=func.now(),
         nullable=False,
         server_default=func.now(),
-    )
-
-    oauth_accounts: Mapped[list["OAuthAccount"]] = relationship( # type: ignore  # noqa: F821
-        back_populates="user", cascade="all, delete-orphan"
     )
