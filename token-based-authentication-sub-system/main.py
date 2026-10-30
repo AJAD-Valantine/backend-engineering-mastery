@@ -2,13 +2,9 @@ from collections.abc import Sequence
 from typing import Any
 from uuid import UUID
 
-from core.database import Base, engine
 from core.dependencies import AuthServiceDep, CurrentUserDep, HttpClientDep
 from fastapi import Cookie, FastAPI, Response, status
 from fastapi.responses import RedirectResponse
-from models.email_verification_token import EmailVerificationToken  # noqa: F401
-from models.oauth_account import OAuthAccount  # noqa: F401
-from models.password_reset_token import PasswordResetToken  # noqa: F401
 from models.refresh_token import RefreshToken
 from models.user import User
 from schemas.auth import (
@@ -22,10 +18,7 @@ from schemas.auth import (
 )
 from schemas.user import UserCreateRequest, UserLoginRequest, UserResponse
 
-app = FastAPI()
-
-Base.metadata.create_all(bind=engine)
-
+app = FastAPI(title="Token-Auth")
 
 @app.post(
     path="/register",
@@ -243,7 +236,6 @@ def login_via_google(
 
 @app.get(
     path="/auth/google/callback",
-    response_model=TokenResponse,
     summary="Handle Google OAuth2 callback",
 )
 async def google_callback(
@@ -253,7 +245,7 @@ async def google_callback(
     http_client: HttpClientDep,
     auth_service: AuthServiceDep,
     oauth_state: str | None = Cookie(default=None),
-) -> TokenResponse:
+) -> RedirectResponse:
 
     auth_service.verify_state(
         returned_state=state,
@@ -261,6 +253,7 @@ async def google_callback(
         response=response,
     )
 
+    # 2. Exchange tokens and fetch user info
     google_tokens: dict[str, Any] = await auth_service.exchange_code_for_tokens(
         code, http_client
     )
@@ -268,10 +261,29 @@ async def google_callback(
         google_tokens["access_token"], http_client
     )
 
-    return auth_service.authenticate_oauth_user(
+    # 3. Get the raw token data from the service
+    tokens: TokenResponse = auth_service.authenticate_oauth_user(
         provider="google",
         account_id=user_info["id"],
         email=user_info["email"],
         first_name=user_info.get("given_name", "Unknown"),
         last_name=user_info.get("family_name", "Unknown"),
     )
+
+    redirect = RedirectResponse(url="http://localhost:8000/docs")
+    redirect.headers.update(response.headers)
+
+    redirect.set_cookie(
+        key="refresh_token",
+        value=tokens.refresh_token,
+        httponly=True,
+        secure=True,
+        samesite="lax",
+    )
+    redirect.set_cookie(
+        key="access_token", value=tokens.access_token, secure=True, samesite="lax"
+    )
+
+    return redirect
+
+

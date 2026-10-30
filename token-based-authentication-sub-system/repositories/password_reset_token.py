@@ -1,7 +1,8 @@
 from datetime import UTC, datetime
+from uuid import UUID
 
 from models.password_reset_token import PasswordResetToken
-from sqlalchemy import select
+from sqlalchemy import delete, select
 from sqlalchemy.orm import Session
 
 
@@ -28,4 +29,12 @@ class PasswordResetTokenRepository:
     def mark_as_used(self, token: PasswordResetToken) -> None:
 
         token.used_at = datetime.now(UTC)
+        self.db.flush()
+
+    def delete_all_pending_for_user(self, user_id: UUID) -> None:
+        stmt = delete(PasswordResetToken).where(
+            PasswordResetToken.user_id == user_id, PasswordResetToken.used_at.is_(None)
+        )
+
+        self.db.execute(stmt)
         self.db.flush()

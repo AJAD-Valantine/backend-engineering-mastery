@@ -47,7 +47,7 @@ class SecurityManager:
 
         encoded_access_token: str = encode(
             payload=token_data,
-            key=self.settings.secret_key.get_secret_value(),
+            key=self.settings.jwt_secret_key.get_secret_value(),
             algorithm=self.settings.algorithm,
         )
 
@@ -59,7 +59,7 @@ class SecurityManager:
         try:
             decoded_jwt: dict[str, Any] = decode(
                 jwt=token,
-                key=self.settings.secret_key.get_secret_value(),
+                key=self.settings.jwt_secret_key.get_secret_value(),
                 algorithms=[self.settings.algorithm],
                 options={
                     "verify_signature": True,

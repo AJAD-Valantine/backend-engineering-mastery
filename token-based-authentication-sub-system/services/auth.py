@@ -102,6 +102,10 @@ class AuthService:
                 detail="Email verification failed",
             )
 
+        self.email_verification_token_repository.delete_all_pending_for_user(
+            user.user_id
+        )
+
         raw_email_verification_token: str = self.security_manager.generate_token()
         hashed_email_verification_token: str = self.security_manager.hash_token(
             raw_email_verification_token
@@ -135,8 +139,8 @@ class AuthService:
                 headers={"WWW-Authenticate": "Bearer"},
             )
 
-        if user is None or not self.security_manager.verify_password(
-            plain_password, user.hashed_password # pyright: ignore[reportArgumentType]
+        if user.hashed_password is None or not self.security_manager.verify_password(
+            plain_password, user.hashed_password
         ):
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
@@ -265,6 +269,8 @@ class AuthService:
                 detail="Password reset failed",
                 headers={"WWW-Authenticate": "Bearer"},
             )
+
+        self.password_reset_token_repository.delete_all_pending_for_user(user.user_id)
 
         raw_password_reset_token: str = self.security_manager.generate_token()
         hashed_password_reset_token: str = self.security_manager.hash_token(raw_password_reset_token)
@@ -457,7 +463,7 @@ class AuthService:
             "prompt": "consent",
         }
 
-        auth_url = self.settings.google_auth_url / urlencode(params)
+        auth_url: str = f"{self.settings.google_auth_url}?{urlencode(params)}"
         return str(auth_url)
 
 
@@ -472,7 +478,7 @@ class AuthService:
                 "code": code,
                 "redirect_uri": self.settings.google_redirect_uri,
                 "client_id": self.settings.google_client_id,
-                "client_secret": self.settings.google_client_secret,
+                "client_secret": self.settings.google_client_secret.get_secret_value(),
             },
         )
 

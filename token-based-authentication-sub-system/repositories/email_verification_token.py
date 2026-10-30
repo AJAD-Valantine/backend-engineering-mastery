@@ -1,7 +1,8 @@
 from datetime import UTC, datetime
+from uuid import UUID
 
 from models.email_verification_token import EmailVerificationToken
-from sqlalchemy import select
+from sqlalchemy import delete, select
 from sqlalchemy.orm import Session
 
 
@@ -28,4 +29,12 @@ class EmailVerificationTokenRepository:
     def mark_as_used(self, token: EmailVerificationToken) -> None:
 
         token.used_at = datetime.now(UTC)
+        self.db.flush()
+
+    def delete_all_pending_for_user(self, user_id: UUID) -> None:
+        stmt = delete(EmailVerificationToken).where(
+            EmailVerificationToken.user_id == user_id,
+            EmailVerificationToken.used_at.is_(None),
+        )
+        self.db.execute(stmt)
         self.db.flush()

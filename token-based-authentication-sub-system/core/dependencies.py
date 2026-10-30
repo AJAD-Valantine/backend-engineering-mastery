@@ -1,4 +1,4 @@
-from collections.abc import AsyncGenerator, Callable, Generator
+from collections.abc import AsyncGenerator, Generator
 from functools import lru_cache
 from typing import Annotated, Any
 from uuid import UUID
@@ -7,7 +7,6 @@ import httpx
 from core.config import Settings
 from core.database import SessionLocal
 from core.email import EmailManager
-from core.enums import UserRole
 from core.security import SecurityManager
 from fastapi import Depends, HTTPException, Request, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer

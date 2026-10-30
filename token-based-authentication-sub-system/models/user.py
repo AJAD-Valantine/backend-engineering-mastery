@@ -50,6 +50,6 @@ class User(Base):
         server_default=func.now(),
     )
 
-    oauth_accounts: Mapped[list["OAuthAccount"]] = relationship( # type: ignore  # noqa: F821
+    oauth_accounts: Mapped[list["OAuthAccount"]] = relationship(  # type: ignore  # noqa: F821
         back_populates="user", cascade="all, delete-orphan"
     )
