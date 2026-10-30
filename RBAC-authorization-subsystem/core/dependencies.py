@@ -168,7 +168,13 @@ def get_owner_or_official(model, id_param: str, *roles):
         current_user: CurrentUserDep,
         db: SessionDep,
     ):
-        resource_id = request.path_params[id_param]
+
+        resource_id_str = request.path_params[id_param]
+        try:
+            resource_id = UUID(resource_id_str)
+        except ValueError:
+            resource_id = resource_id_str
+
         resource = db.get(model, resource_id)
 
         if resource is None:
@@ -183,3 +189,8 @@ def get_owner_or_official(model, id_param: str, *roles):
         return resource
 
     return checker
+
+OwnerOrOfficialUser = Annotated[
+    User,
+    Depends(get_owner_or_official(User, "user_id", UserRole.ADMIN, UserRole.MODERATOR)),
+]
