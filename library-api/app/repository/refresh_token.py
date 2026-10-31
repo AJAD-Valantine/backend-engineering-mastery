@@ -1,7 +1,7 @@
 from datetime import UTC, datetime
 from uuid import UUID
 
-from sqlalchemy import select, update
+from sqlalchemy import delete, select, update
 from sqlalchemy.orm import Session
 
 from app.models.refresh_token import RefreshToken
@@ -43,3 +43,11 @@ class RefreshTokenRepository:
 
         self.db.execute(stmt)
         self.db.flush()
+
+    def delete_by_user_id(self, user_id: UUID):
+
+        stmt = delete(RefreshToken).where(
+            RefreshToken.user_id == user_id
+        )
+
+        self.db.execute(stmt)

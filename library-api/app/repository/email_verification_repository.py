@@ -1,6 +1,7 @@
 from datetime import UTC, datetime
+from uuid import UUID
 
-from sqlalchemy import select
+from sqlalchemy import delete, select
 from sqlalchemy.orm import Session
 
 from app.models.email_verification_token import EmailVerificationToken
@@ -30,3 +31,11 @@ class EmailVerificationTokenRepository:
 
         token.used_at = datetime.now(UTC)
         self.db.flush()
+
+    def delete_by_user_id(self, user_id: UUID):
+
+        stmt = delete(EmailVerificationToken).where(
+            EmailVerificationToken.user_id == user_id
+        )
+
+        self.db.execute(stmt)
