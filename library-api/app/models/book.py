@@ -51,7 +51,7 @@ class Book(Base):
     )
 
     copies: Mapped[list["BookCopy"]] = relationship(  # type: ignore  # noqa: F821
-        back_populates="book", cascade="all"
+        back_populates="book", cascade="all, delete-orphan"
     )
 
     # -- TABLE ARGS -- #

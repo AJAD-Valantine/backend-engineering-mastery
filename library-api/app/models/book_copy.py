@@ -26,6 +26,7 @@ class BookCopy(Base):
     status: Mapped[CopyStatus] = mapped_column(
         SAEnum(CopyStatus, name="copy_status"),
         nullable=False,
+        default=CopyStatus.ACTIVE,
         server_default=CopyStatus.ACTIVE,
     )
 

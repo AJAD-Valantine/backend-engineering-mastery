@@ -1,7 +1,7 @@
 import uuid
-from datetime import datetime
+from datetime import UTC, datetime
 
-from sqlalchemy import UUID, CheckConstraint, DateTime, ForeignKey, Index, func
+from sqlalchemy import UUID, CheckConstraint, DateTime, ForeignKey, Index, func, text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.database import Base
@@ -28,7 +28,10 @@ class Loan(Base):
     )
 
     borrowed_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), nullable=False, server_default=func.now()
+        DateTime(timezone=True),
+        nullable=False,
+        default=lambda: datetime.now(UTC),
+        server_default=func.now(),
     )
 
     due_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
@@ -62,6 +65,7 @@ class Loan(Base):
             "uq_active_loan_per_copy",
             "book_copy_id",
             unique=True,
-            postgresql_where="returned_at IS NULL",
+            postgresql_where=text("returned_at IS NULL"),
+            sqlite_where=text("returned_at IS NULL"),
         ),
     )

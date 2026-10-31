@@ -17,7 +17,7 @@ class PasswordResetToken(Base):
     # -- COLUMNS -- #
 
     password_reset_token_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), primary_key=True
+        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
     )
 
     user_id: Mapped[uuid.UUID] = mapped_column(
@@ -30,10 +30,12 @@ class PasswordResetToken(Base):
         unique=True,
     )
 
-    expires_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+    expires_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False
+    )
 
     used_at: Mapped[datetime] = mapped_column(
-        DateTime, nullable=True, server_default=None
+        DateTime(timezone=True), nullable=True, server_default=None
     )
 
     # -- RELATIONSHIPS -- #

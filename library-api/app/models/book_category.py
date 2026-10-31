@@ -19,6 +19,6 @@ class BookCategory(Base):
 
     # -- TABLE ARGS -- #
 
-    __table_args__ = PrimaryKeyConstraint(
-        "book_id", "category_id", name="pk_book_categories"
+    __table_args__ = (
+        PrimaryKeyConstraint("book_id", "category_id", name="pk_book_categories"),
     )

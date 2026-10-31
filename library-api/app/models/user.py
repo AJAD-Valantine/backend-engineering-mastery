@@ -41,6 +41,8 @@ class User(Base):
 
     phone: Mapped[str] = mapped_column(String(25), nullable=False)
 
+    address: Mapped[str | None] = mapped_column(String(255), nullable=True, default=None)
+
     hashed_password: Mapped[str] = mapped_column(String(255), nullable=False)
 
     role: Mapped[UserRole] = mapped_column(
@@ -63,7 +65,7 @@ class User(Base):
     is_verified: Mapped[bool] = mapped_column(
         default=False,
         nullable=False,
-        index=True
+        index=True,
     )
 
     updated_at: Mapped[datetime] = mapped_column(
@@ -83,11 +85,11 @@ class User(Base):
         back_populates="user", cascade="all, delete-orphan"
     )
 
-    password_reset_tokens: Mapped["PasswordResetToken"] = relationship(  # type: ignore  # noqa: F821
+    password_reset_tokens: Mapped[list["PasswordResetToken"]] = relationship(  # type: ignore  # noqa: F821
         back_populates="user", cascade="all, delete-orphan"
     )
 
-    email_verification_tokens: Mapped["EmailVerificationToken"] = relationship(  # type: ignore  # noqa: F821
+    email_verification_tokens: Mapped[list["EmailVerificationToken"]] = relationship(  # type: ignore  # noqa: F821
         back_populates="user", cascade="all, delete-orphan"
     )
 
