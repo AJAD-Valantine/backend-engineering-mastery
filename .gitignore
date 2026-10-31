@@ -142,6 +142,7 @@ coverage.json
 # =========================
 
 pyproject.toml
-files.py
 requirements.txt
-combined_code.txt
+extract_code.py
+extracted_code.txt
+*.md
