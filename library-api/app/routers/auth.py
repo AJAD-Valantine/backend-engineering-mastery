@@ -1,16 +1,15 @@
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, status
 
-from app.core.dependencies import OAuth2Form, get_auth_service  # type: ignore
+from app.core.dependencies import AuthServiceDep
 from app.models.user import User
 from app.schemas.auth import (
     ForgotPasswordRequest,
+    LoginRequest,
     RefreshTokenRequest,
     ResetPasswordRequest,
+    TokenResponse,
 )
 from app.schemas.user import UserCreateRequest, UserResponse
-from app.services.auth import AuthService
-
-from ..schemas.auth import TokenResponse
 
 auth_router = APIRouter(prefix="/auth", tags=["Authentication"])
 
@@ -23,7 +22,7 @@ auth_router = APIRouter(prefix="/auth", tags=["Authentication"])
 )
 def register_user(
     request: UserCreateRequest,
-    auth_service: AuthService = Depends(get_auth_service),
+    auth_service: AuthServiceDep,
 ) -> User:
 
     return auth_service.register_user(request)
@@ -35,11 +34,11 @@ def register_user(
     summary="User log in — returns access + refresh token",
 )
 def login_user(
-    form_data: OAuth2Form,
-    auth_service: AuthService = Depends(get_auth_service),
+    request_body: LoginRequest,
+    auth_service: AuthServiceDep,
 ) -> TokenResponse:
 
-    return auth_service.authenticate_user(form_data.username, form_data.password)
+    return auth_service.authenticate_user(request_body.email, request_body.password)
 
 
 @auth_router.post(
@@ -49,13 +48,12 @@ def login_user(
 )
 def refresh_tokens(
     body: RefreshTokenRequest,
-    auth_service: AuthService = Depends(get_auth_service),
+    auth_service: AuthServiceDep,
 ) -> TokenResponse:
 
     return auth_service.refresh_tokens(body.refresh_token)
 
 
-# OPTION A — keep this one if you want single-device logout
 @auth_router.post(
     path="/logout",
     status_code=status.HTTP_204_NO_CONTENT,
@@ -63,13 +61,12 @@ def refresh_tokens(
 )
 def logout(
     body: RefreshTokenRequest,
-    auth_service: AuthService = Depends(get_auth_service),
+    auth_service: AuthServiceDep,
 ) -> None:
 
     auth_service.logout(body.refresh_token)
 
 
-# OPTION B — keep this one (or replace the above) for all-device logout
 @auth_router.post(
     path="/logout/all",
     status_code=status.HTTP_204_NO_CONTENT,
@@ -77,25 +74,31 @@ def logout(
 )
 def logout_all(
     body: RefreshTokenRequest,
-    auth_service: AuthService = Depends(get_auth_service),
+    auth_service: AuthServiceDep,
 ) -> None:
 
     auth_service.logout_all(body.refresh_token)
 
 
-@auth_router.post("/forgot-password", status_code=204)
+@auth_router.post(
+        path="/forgot-password",
+        status_code=204
+)
 def forgot_password(
     request: ForgotPasswordRequest,
-    auth_service: AuthService = Depends(get_auth_service),
+    auth_service: AuthServiceDep,
 ) -> None:
 
     auth_service.forgot_password(request.email)
 
 
-@auth_router.post("/reset-password", status_code=204)
+@auth_router.post(
+        path="/reset-password",
+        status_code=204
+)
 def reset_password(
     request: ResetPasswordRequest,
-    auth_service: AuthService = Depends(get_auth_service),
+    auth_service: AuthServiceDep,
 ) -> None:
 
     auth_service.reset_password(request.token, request.new_password)
@@ -108,7 +111,7 @@ def reset_password(
 )
 def verify_email(
     token: str,
-    auth_service: AuthService = Depends(get_auth_service),
+    auth_service: AuthServiceDep,
 ) -> None:
 
     auth_service.verify_email(token)
