@@ -1,3 +1,5 @@
+from pydantic import EmailStr
+
 from app.schemas.base import AppBaseModel
 
 
@@ -18,3 +20,7 @@ class ForgotPasswordRequest(AppBaseModel):
 class ResetPasswordRequest(AppBaseModel):
     token: str
     new_password: str
+
+class LoginRequest(AppBaseModel):
+    email: EmailStr
+    password: str
